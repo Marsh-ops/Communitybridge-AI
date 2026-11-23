@@ -1,0 +1,37 @@
+# SIMULATED appointment calendar. Invented slots for testing.
+# Read by src/communitybridge/simulated/calendar_api.py.
+# SVC-ADL-CARD-01 has slots in November and December 2026 so the re-planning path
+# ("next appointment window",) has somewhere to go. Visiting services only have
+# slots on their visit dates in data/services/services.yaml.
+# Every row states its mode. The telehealth row is the referred specialist's own telehealth consult,
+# joined from the client's town and offered only when travel can't be arranged (offered_as:
+# fallback_only). It is not a separately listed local service, so the §6.4.6 nearest-service check
+# is unchanged and SC-01 stays eligible. Used by RP-01 in replan_scenarios.yaml.
+# Listed telehealth services (mode telehealth in services.yaml) are joined from the hospital in
+# their own town (offered_as: listed_service). Every service has at least one slot (C1 review).
+
+slots:
+  - {mode: in_person, service_id: SVC-ADL-CARD-01, starts: ["2026-11-10T09:30:00", "2026-11-12T14:00:00", "2026-11-24T10:00:00", "2026-12-08T09:00:00", "2026-12-15T09:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-ADL-OPHT-01, starts: ["2026-11-17T11:00:00", "2026-12-01T09:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-ADL-ONCM-01, starts: ["2026-11-09T10:00:00", "2026-11-16T10:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-ADL-ONCR-01, starts: ["2026-11-11T08:30:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-ADL-NEPH-01, starts: ["2026-11-19T13:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-ADL-ENDO-01, starts: ["2026-11-20T09:30:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-ADL-PSYC-01, starts: ["2026-11-13T15:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-ADL-ORTH-01, starts: ["2026-11-26T10:30:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-ADL-DERM-01, starts: ["2026-11-27T14:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-ADL-OBGY-01, starts: ["2026-11-18T09:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-PLN-OPHT-V1, starts: ["2026-11-05T10:00:00", "2026-12-03T10:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-CED-OPHT-V1, starts: ["2026-11-12T09:00:00"], simulated: true, synthetic: true}
+  - {mode: telehealth, service_id: SVC-CED-PSYC-T1, telehealth_host_town: CEDUNA, offered_as: listed_service, starts: ["2026-11-06T13:00:00", "2026-11-20T13:00:00"], simulated: true, synthetic: true}
+  - {mode: telehealth, service_id: SVC-CED-ENDO-T1, telehealth_host_town: CEDUNA, offered_as: listed_service, starts: ["2026-11-10T11:00:00"], simulated: true, synthetic: true}
+  # Added in the C1 scenario review (2026-10-19): services that had no slots at all.
+  - {mode: in_person, service_id: SVC-PLN-GSUR-01, starts: ["2026-11-17T10:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-PLN-CHEM-01, starts: ["2026-11-04T09:00:00", "2026-11-18T09:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-PLN-DIAL-01, starts: ["2026-11-02T08:00:00", "2026-11-04T08:00:00", "2026-11-06T08:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-WHY-OBGY-01, starts: ["2026-11-25T09:30:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-WHY-CHEM-01, starts: ["2026-11-09T09:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-WHY-DERM-V1, starts: ["2026-11-18T10:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-PAU-DIAL-01, starts: ["2026-11-03T08:00:00"], simulated: true, synthetic: true}
+  - {mode: in_person, service_id: SVC-ADL-PHYS-01, starts: ["2026-11-16T14:00:00"], simulated: true, synthetic: true}
+  - {mode: telehealth, service_id: SVC-ADL-CARD-01, telehealth_host_town: CEDUNA, offered_as: fallback_only, starts: ["2026-12-10T11:00:00"], simulated: true, synthetic: true}

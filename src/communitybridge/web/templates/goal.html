@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{% if problems %}Problem: {% endif %}Start a request - CommunityBridge AI{% endblock %}
+{% block content %}
+{% include "_problems.html" %}
+<h1>What do you need?</h1>
+<p class="lead">
+  Tell us where you need to go and when, in your own words. We put together one travel plan for a
+  specialist appointment in Adelaide, and show where every fact in it came from.
+</p>
+<p>Nothing is booked or shared until you say yes.</p>
+
+<form method="post" action="/goal">
+  <label for="goal-text">Your request</label>
+  <p class="hint" id="goal-hint">
+    For example: "I need to get from Ceduna to my cardiology appointment in Adelaide next month."
+    Words like "next month" are worked out from {{ reference_date }}.
+    This is a prototype: please use made-up details, not real names or health information.
+  </p>
+  <textarea id="goal-text" name="goal_text" rows="5" maxlength="{{ max_chars }}" required
+            aria-describedby="goal-hint{% if problems %} problems{% endif %}"
+            {% if problems %}aria-invalid="true"{% endif %}>{{ goal_text }}</textarea>
+  <p><button type="submit">Read my request</button></p>
+</form>
+{% endblock %}

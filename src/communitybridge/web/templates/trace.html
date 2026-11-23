@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Agent trace - CommunityBridge AI{% endblock %}
+{% block content %}
+<h1>What the agents did</h1>
+<p>
+  This is every step the agents took on this request, in the order they happened: what each did,
+  which tool or source it used, what came out, and how it went. It lists steps, not your personal details.
+  Times are in UTC (Coordinated Universal Time).
+</p>
+
+{% if rows %}
+<p class="counts">{{ rows | length }} events from {{ rows | map(attribute="agent") | unique | list | length }} of the 6 agents.</p>
+<table class="trace">
+  <caption>Agent trace: {{ rows | length }} events, oldest first</caption>
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Time (UTC)</th>
+      <th scope="col">Agent</th>
+      <th scope="col">Task</th>
+      <th scope="col">Tool or source</th>
+      <th scope="col">Result</th>
+      <th scope="col">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr>
+      <th scope="row">{{ row.number }}</th>
+      <td data-label="Time (UTC)"><time datetime="{{ row.iso }}">{{ row.clock }}</time></td>
+      <td data-label="Agent">{{ row.agent }}</td>
+      <td data-label="Task" class="wrap">{{ row.task }}</td>
+      <td data-label="Tool or source" class="wrap">{{ row.source }}</td>
+      <td data-label="Result" class="wrap">{{ row.result }}</td>
+      <td data-label="Status"><span class="badge {{ row.status_style }}">{{ row.status }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>There are no events in the trace yet.</p>
+{% endif %}
+{% endblock %}

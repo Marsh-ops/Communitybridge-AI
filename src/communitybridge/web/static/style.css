@@ -1,0 +1,531 @@
+/* Styles for every screen. Plain CSS, no framework, so each rule can be explained.
+
+   Accessibility choices (WCAG 2.2 AA, measured in a manual checklist):
+   - Colours (calculated with the WCAG formula): text #1a1a1a on #ffffff is 17.4:1 and on the
+     header/footer band #eef3f8 is 15.6:1; links #0b4f8a are 8.4:1 on white and 7.5:1 on the band
+     (text needs 4.5:1). The focus outline #b45309 is 5.0:1 on white and 4.5:1 on the band
+     (non-text needs 3:1).
+   - Sizes in rem so the page follows the user's own text-size setting (1.4.4).
+   - Interactive things are at least 44 px tall, above the 24 px minimum in 2.5.8.
+   - A visible focus outline on everything focusable (2.4.7, 2.4.11).
+   - No animation, so nothing to switch off for reduced motion (2.3.3). */
+
+:root {
+  --text: #1a1a1a;
+  --background: #ffffff;
+  --link: #0b4f8a;
+  --focus: #b45309;
+  --band: #eef3f8;
+  --border: #5c6b7a;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background: var(--background);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+a {
+  color: var(--link);
+  text-underline-offset: 0.2em;
+}
+
+/* One focus style for links, buttons, form fields and the skip link (the skip link and the
+   main region are focus targets as well). */
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* The main region takes focus after the skip link is used, so its outline is not needed. */
+main:focus {
+  outline: none;
+}
+
+/* Hidden until it gets keyboard focus, then shown at the top left (2.4.1, 2.4.7). */
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -4rem;
+  z-index: 10;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  background: var(--background);
+  border: 2px solid var(--link);
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+.site-header,
+.site-footer {
+  background: var(--band);
+  padding: 0.75rem 1rem;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.site-footer {
+  margin-top: 3rem;
+  border-top: 2px solid var(--border);
+  font-size: 1rem;
+}
+
+.site-name {
+  margin: 0;
+  font-weight: 700;
+}
+
+.nav-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+}
+
+/* The current page is marked in text weight and a line, not by colour alone (1.4.1). */
+.nav-list a[aria-current="page"] {
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 3px solid var(--link);
+}
+
+main {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 0;
+}
+
+h1 {
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+.lead {
+  font-size: 1.25rem;
+}
+
+/* --- forms and details ------------------------------------------------------------- */
+
+h2 {
+  font-size: 1.375rem;
+  margin-top: 2rem;
+}
+
+label {
+  display: inline-block;
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+textarea,
+input[type="text"] {
+  font: inherit;
+  color: var(--text);
+  background: var(--background);
+  border: 2px solid var(--border);
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  min-height: 7rem;
+}
+
+/* Text boxes fill their line up to a readable width; only the age box is short. The first version
+   gave every text box the age box's 5rem, so name and phone boxes showed about six characters
+   (found in a browser pass). */
+input[type="text"] {
+  min-height: 2.75rem;
+  width: 100%;
+  max-width: 24rem;
+}
+
+input[inputmode="numeric"] {
+  width: 5rem;
+}
+
+/* A fieldset's browser default is min-width: min-content, so one long unbreakable word (a file path
+   in a source line) made the whole booking screen scroll sideways at 320 px. min-width: 0 lets it
+   shrink, and the long words wrap (WCAG 1.4.10; found in a browser pass). */
+fieldset {
+  min-width: 0;
+  margin: 1rem 0;
+  padding: 0.5rem 1rem 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 0.25rem;
+}
+
+legend {
+  padding: 0 0.25rem;
+  font-weight: 600;
+}
+
+/* A radio button and its label sit together, and the whole label is the click target. */
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.5rem;
+  margin: 0.25rem 0 0;
+}
+
+.choices input[type="radio"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0 0.5rem 0 0;
+  vertical-align: middle;
+}
+
+.choices label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-weight: 400;
+}
+
+/* Buttons: text on #0b4f8a is 8.4:1. Never colour alone: each says what it does in words. */
+button {
+  font: inherit;
+  font-weight: 600;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.25rem;
+  color: #ffffff;
+  background: var(--link);
+  border: 2px solid var(--link);
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+button.secondary {
+  color: var(--link);
+  background: var(--background);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* An error is a box with a heavy border and the words "There is a problem" (1.4.1, 3.3.1).
+   #8a1c14 on #fdecea is 8.1:1 (calculated, as above). */
+.problems {
+  padding: 0.75rem 1rem;
+  color: #8a1c14;
+  background: #fdecea;
+  border: 3px solid #8a1c14;
+  border-radius: 0.25rem;
+}
+
+.own-words {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  background: var(--band);
+  border-left: 4px solid var(--border);
+}
+
+.details {
+  margin: 0;
+}
+
+.detail {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) 2fr;
+  gap: 0.25rem 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail dt {
+  font-weight: 600;
+}
+
+.detail dd {
+  margin: 0;
+}
+
+/* Narrow screens: the label sits above its value, so nothing needs sideways scrolling (1.4.10). */
+@media (max-width: 36rem) {
+  .detail {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- the plan view ----------------------------------------------------------------- */
+
+.plan {
+  margin: 1.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.plan-item {
+  margin: 0 0 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 0.25rem;
+}
+
+.plan-item p {
+  margin: 0.25rem 0;
+}
+
+.sources-heading {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.sources,
+.detail dd {
+  overflow-wrap: anywhere;
+}
+
+.sources {
+  margin: 0.25rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 1rem;
+}
+
+/* A badge is a word in a box. Verified, blocked and simulated never rely on colour alone (1.4.1):
+   each says what it is, and the SIMULATED outline is dashed. Contrast, calculated with the WCAG
+   formula: #0b4f8a on white 8.4:1; #8a1c14 on #fdecea 8.1:1; #5a3a00 on #fff4d6 9.4:1. */
+.badge {
+  display: inline-block;
+  padding: 0.0625rem 0.5rem;
+  border: 2px solid currentColor;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.badge-verified {
+  color: var(--link);
+  background: var(--background);
+}
+
+.badge-blocked {
+  color: #8a1c14;
+  background: #fdecea;
+}
+
+.badge-simulated {
+  color: #5a3a00;
+  background: #fff4d6;
+  border-style: dashed;
+}
+
+.blocked-reason {
+  color: #8a1c14;
+}
+
+.counts {
+  font-weight: 600;
+}
+
+.note {
+  padding: 0.5rem 0.75rem;
+  background: var(--band);
+  border-left: 4px solid var(--border);
+}
+
+/* --- booking, consent and result screens ------------------------------------------- */
+
+.option {
+  margin: 0.75rem 0 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 0.25rem;
+}
+
+/* The option radio and its label sit on one line, the label big enough to be a click target. */
+.option > input[type="radio"],
+.choices input[type="checkbox"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0 0.5rem 0 0;
+  vertical-align: middle;
+}
+
+.option > label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  font-size: 1.125rem;
+}
+
+.action {
+  margin: 1.25rem 0;
+}
+
+input[type="date"] {
+  font: inherit;
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  border: 2px solid var(--border);
+  border-radius: 0.25rem;
+}
+
+input:disabled + label {
+  color: var(--border);
+}
+
+.results {
+  padding-left: 1.25rem;
+}
+
+.results li {
+  margin: 0.5rem 0;
+}
+
+/* --- the agent trace table --------------------------------------------------------- */
+
+.badge-neutral {
+  color: var(--text);
+  background: var(--band);
+}
+
+.trace {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+/* The agent trace has seven columns, which do not fit the 44rem reading column without breaking
+   ordinary words, so this one page gets a wider column. */
+main:has(.trace) {
+  max-width: 72rem;
+}
+
+.trace caption {
+  padding: 0.5rem 0;
+  text-align: left;
+  font-weight: 600;
+}
+
+/* Long words may break in the three text columns, so the table fits its column at every width.
+   Without this it was 947 px wide in a 704 px column and the page scrolled sideways between about
+   770 and 1100 px. Only these columns: `anywhere` lets a column shrink to one letter, so on every
+   cell it broke "Time", "Agent" and "Done" into pieces. */
+.trace .wrap {
+  overflow-wrap: anywhere;
+}
+
+.trace th,
+.trace td {
+  padding: 0.5rem;
+  vertical-align: top;
+  text-align: left;
+  border: 1px solid var(--border);
+}
+
+.trace thead th {
+  background: var(--band);
+}
+
+/* Narrow screens: each row becomes a block and each value names its column, so the table needs
+   no sideways scrolling (WCAG 1.4.10 Reflow). The header row stays for screen readers only. */
+@media (max-width: 48rem) {
+  .trace caption {
+    display: block;
+  }
+
+  .trace thead {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .trace,
+  .trace tbody,
+  .trace tr,
+  .trace th,
+  .trace td {
+    display: block;
+  }
+
+  .trace tr {
+    margin: 0 0 1rem;
+    border: 2px solid var(--border);
+  }
+
+  .trace th,
+  .trace td {
+    border: 0;
+    border-bottom: 1px solid var(--band);
+  }
+
+  .trace tbody th::before {
+    content: "Step ";
+  }
+
+  .trace td::before {
+    content: attr(data-label) ": ";
+    font-weight: 600;
+  }
+}
+
+/* --- a row of links ---------------------------------------------------------------- */
+
+/* Links that stand alone, not inside a sentence, are laid out as targets at least 44 px tall with
+   space between them (WCAG 2.5.8 Target Size). Links inside a sentence are exempt from that rule. */
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
+}
+
+.links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+/* A consent action's heading is long and carries a SIMULATED badge. In a fieldset a legend sits on
+   the border, so a heading that wraps was cut through by the line. Floating it full width makes it
+   an ordinary block inside the box (found in a browser pass). */
+.action legend {
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 0.5rem;
+}
+
+.action legend + * {
+  clear: both;
+}

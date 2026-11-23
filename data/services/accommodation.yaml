@@ -1,0 +1,11 @@
+# Synthetic accommodation dataset. All providers are invented.
+# `commercial` reflects PATS §6.6.1: only commercial accommodation (with an ABN) is subsidised.
+# ACC-ADL-03 is deliberately non-commercial (a supported residential facility) to test §6.6.1.
+# Prices and availability are in data/simulated/accommodation.yaml (SIMULATED API fixture).
+
+accommodation:
+  - {accommodation_id: ACC-ADL-01, name: Synthetic Patient Hostel Adelaide, town: ADELAIDE, commercial: true, source: CommunityBridge synthetic accommodation dataset v1, last_verified: 2026-09-30, synthetic: true}
+  - {accommodation_id: ACC-ADL-02, name: Synthetic City Motel Adelaide, town: ADELAIDE, commercial: true, source: CommunityBridge synthetic accommodation dataset v1, last_verified: 2026-09-30, synthetic: true}
+  - {accommodation_id: ACC-ADL-03, name: Synthetic Supported Residential Facility Adelaide, town: ADELAIDE, commercial: false, source: CommunityBridge synthetic accommodation dataset v1, last_verified: 2026-09-30, synthetic: true}
+  - {accommodation_id: ACC-PLN-01, name: Synthetic Port Lincoln Motel, town: PORT_LINCOLN, commercial: true, source: CommunityBridge synthetic accommodation dataset v1, last_verified: 2026-09-12, synthetic: true}
+  - {accommodation_id: ACC-WHY-01, name: Synthetic Whyalla Caravan Park, town: WHYALLA, commercial: true, source: CommunityBridge synthetic accommodation dataset v1, last_verified: 2026-09-12, synthetic: true}

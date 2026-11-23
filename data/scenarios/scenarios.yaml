@@ -1,0 +1,565 @@
+# 30 manually checked evaluation scenarios. All people and details are synthetic.
+#
+# Expected outcomes were worked out by hand from the PATS Guidelines V26.4 PDF and the
+# interpretation notes in the rules file. `working` shows each calculation so it can be checked.
+# Air vs surface: surface = cheaper of private vehicle (32.8 c/km x return
+# km, §7.2.1) and simulated standard fare x travellers (§7.2.2, data/simulated/transport.yaml);
+# plus the nights of the two that §7.3.1 would actually subsidise, at $110 (alone) or $154
+# (client + escort) (§7.3): both nights for concession holders and AES clients (§6.1.2), the
+# second night only otherwise. Compared with simulated return air fare x travellers
+# (§7.2.5 item 2).
+# Distances are from data/geo/towns_distances.csv (synthetic). "Next month" = November 2026.
+# §6.2/§6.3 are assumed preconditions and are not repeated per scenario.
+# §6.5.1 Cumulative Travel is out of scope (the project plan,): it is never used to decide an
+# outcome, but a plan that fails the distance requirement must show the §6.5.1 notice.
+
+reference_date: 2026-10-11
+rules_version: "26.4"
+
+scenarios:
+  # ===================================================================== core (1)
+  - id: SC-01
+    category: core
+    title: Ceduna to Adelaide cardiology, Aboriginal client with escort (core journey)
+    goal: >-
+      I need to get from Ceduna to my cardiology appointment in Adelaide next month. I'm
+      Aboriginal and my sister will come with me.
+    expected_fields: {origin_town: Ceduna, specialty: Cardiology, earliest_date: 2026-11-01, latest_date: 2026-11-30, escort_requested: true, indigenous_status: aboriginal}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: eligible
+      must_cite: ["6.1", "9.2", "6.4.6", "6.5", "6.1.2", "7.2.8", "7.2.5", "7.2.1", "7.3", "7.3.1"]
+      entitlements: {escort: true, advance: true, air_most_economical: true}
+      working: >-
+        Permanent SA resident, not APY (§6.1, §6.1.1 n/a). Cardiology is on the §9.2 list.
+        Cardiology exists only in Adelaide in the dataset, so Adelaide is nearest (§6.4.6).
+        Ceduna-Adelaide 780 km > 100 (§6.5). Aboriginal: escort automatic (§6.1.2, §7.2.8)
+        and advance available without §6.5.5 tests (§6.1.2). Air vs surface, 2 travellers:
+        private vehicle 2 x 780 x 0.328 = 511.68; bus 138 x 2 x 2 = 552; surface = 511.68.
+        No concession card, but §6.1.2 removes the concession requirement for the first night,
+        so both nights count (§7.3.1): + 2 x 154 = 308 -> 819.68. Air 390 x 2 = 780.
+        819.68 > 780, so air is the most economical mode (§7.2.5 item 2) with no medical
+        endorsement needed.
+    synthetic: true
+
+  # ========================================================== travel_distance (6)
+  - id: SC-02
+    category: travel_distance
+    title: Exactly 100 km is not more than 100 km
+    goal: I live in Synthetic Boundary Town 100 and need to see the surgeon in Port Lincoln in November.
+    expected_fields: {origin_town: Synthetic Boundary Town 100, specialty: General surgery, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    destination_service_id: SVC-PLN-GSUR-01
+    expected:
+      outcome: not_eligible
+      must_cite: ["6.5", "6.5.3"]
+      out_of_scope_notices: ["6.5.1"]
+      working: >-
+        Distance 100 km, which is not "more than 100km" (§6.5), so it falls in the
+        §6.5.3 band (90-100 inclusive). §6.5.3 needs a lethargic treatment (chemotherapy or
+        radiation, closed list); general surgery is not, so it fails. The distance
+        requirement isn't met, so the plan shows the §6.5.1 not-assessed notice.
+        Not eligible.
+    synthetic: true
+
+  - id: SC-03
+    category: travel_distance
+    title: 95 km chemotherapy with a longer alternate route qualifies (Distance vs Safety)
+    goal: I'm in Synthetic Boundary Town 95 and need chemotherapy at Port Lincoln next month.
+    expected_fields: {origin_town: Synthetic Boundary Town 95, specialty: chemotherapy, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {treatment: chemotherapy, alternate_route_km: 104}
+    destination_service_id: SVC-PLN-CHEM-01
+    expected:
+      outcome: eligible
+      must_cite: ["6.5", "6.5.3", "6.4.2"]
+      working: >-
+        95 km is not > 100 (§6.5) but is in the §6.5.3 band. Both criteria are met: alternate
+        route 104 km > 100, and chemotherapy is a listed lethargic treatment. Chemotherapy is an
+        approved service (§6.4.2). Nearest chemotherapy is Port Lincoln (95 km vs Whyalla 375 km),
+        so §6.4.6 passes. Eligible.
+    synthetic: true
+
+  - id: SC-04
+    category: travel_distance
+    title: 95 km chemotherapy without a longer alternate route does not qualify
+    goal: I'm in Synthetic Boundary Town 95 and need chemotherapy at Port Lincoln next month.
+    expected_fields: {origin_town: Synthetic Boundary Town 95, specialty: chemotherapy, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {treatment: chemotherapy, alternate_route_km: 98}
+    destination_service_id: SVC-PLN-CHEM-01
+    expected:
+      outcome: not_eligible
+      must_cite: ["6.5", "6.5.3"]
+      out_of_scope_notices: ["6.5.1"]
+      working: >-
+        95 km is not > 100 (§6.5). It is in the §6.5.3 band, and chemotherapy is a lethargic
+        treatment, but the alternate route of 98 km is not over 100, and §6.5.3 needs both, so it
+        fails. Chemotherapy is oncology, so Cumulative Travel might apply in real life; it is out
+        of scope, so the plan shows the §6.5.1 notice and refers the client to a person.
+        Not eligible under the rules this prototype assesses.
+    synthetic: true
+
+  - id: SC-05
+    category: travel_distance
+    title: Exactly 100 km chemotherapy is inside the Distance vs Safety band (inclusive upper bound)
+    goal: I live in Synthetic Boundary Town 100 and need chemotherapy at Port Lincoln in November.
+    expected_fields: {origin_town: Synthetic Boundary Town 100, specialty: chemotherapy, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {treatment: chemotherapy, alternate_route_km: 108}
+    destination_service_id: SVC-PLN-CHEM-01
+    expected:
+      outcome: eligible
+      must_cite: ["6.5", "6.5.3", "6.4.2"]
+      working: >-
+        100 km is not "more than 100km" (§6.5), but the §6.5.3 band is 90-100 inclusive,
+        so 100 is inside it (the upper-bound partner of SC-07). Alternate route 108 km > 100 and
+        chemotherapy is a lethargic treatment, so both §6.5.3 criteria are met. Chemotherapy is an
+        approved service (§6.4.2). Nearest chemotherapy is Port Lincoln (100 km vs Whyalla 380 km).
+        Same town and distance as SC-02, which fails only because surgery isn't lethargic.
+        Eligible.
+    synthetic: true
+
+  - id: SC-06
+    category: travel_distance
+    title: Regular 70 km dialysis is not assessed for Cumulative Travel, so the plan refers it on
+    goal: I live in Synthetic Boundary Town 70 and need dialysis at Port Lincoln three times a week from November.
+    expected_fields: {origin_town: Synthetic Boundary Town 70, specialty: renal dialysis, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {treatment: renal dialysis}
+    destination_service_id: SVC-PLN-DIAL-01
+    expected:
+      outcome: not_eligible
+      must_cite: ["6.5"]
+      out_of_scope_notices: ["6.5.1"]
+      working: >-
+        70 km is not > 100 (§6.5) and is below the §6.5.3 band (90-100), so the distance
+        requirement isn't met. Regular dialysis at this distance is exactly what Cumulative Travel
+        (§6.5.1) can cover, but it is out of scope for this prototype, so the engine
+        doesn't decide it. The plan must show the §6.5.1 notice and refer the client to their ACCHO
+        health worker or PATS. Not eligible under the rules this prototype assesses.
+    synthetic: true
+
+  - id: SC-07
+    category: travel_distance
+    title: 90 km is inside the Distance vs Safety band (inclusive lower bound)
+    goal: I'm in Synthetic Boundary Town 90 and need chemotherapy in Port Lincoln next month.
+    expected_fields: {origin_town: Synthetic Boundary Town 90, specialty: chemotherapy, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {treatment: chemotherapy, alternate_route_km: 112}
+    destination_service_id: SVC-PLN-CHEM-01
+    expected:
+      outcome: eligible
+      must_cite: ["6.5", "6.5.3"]
+      working: >-
+        90 km is not > 100 (§6.5). §6.5.3 band is 90-100 inclusive, so 90 is inside it.
+        Alternate route 112 km > 100 and chemotherapy is a lethargic treatment. Nearest
+        chemotherapy is Port Lincoln. Eligible.
+    synthetic: true
+
+  # ========================================================== nearest_service (7)
+  - id: SC-08
+    category: nearest_service
+    title: Visiting eye clinic in Ceduna is nearer than Adelaide
+    goal: I need to see an eye specialist in Adelaide next month. I live in Ceduna.
+    expected_fields: {origin_town: Ceduna, specialty: Ophthalmology, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    destination_service_id: SVC-ADL-OPHT-01
+    expected:
+      outcome: not_eligible
+      must_cite: ["6.4.6"]
+      out_of_scope_notices: ["6.4.7"]
+      working: >-
+        A visiting ophthalmology clinic attends Ceduna on 12 Nov 2026, inside the window.
+        Visiting services count as nearest (§6.4.6), and no bypass reason is given, so
+        travel to Adelaide fails §6.4.6. The plan should offer the Ceduna visiting clinic instead.
+        The nearest-service requirement isn't met, so the plan shows the §6.4.7 not-assessed
+        notice.
+    synthetic: true
+
+  - id: SC-09
+    category: nearest_service
+    title: Telehealth psychiatry in Ceduna is the nearest service
+    goal: Can you help me get from Ceduna to a psychiatrist in Adelaide in November?
+    expected_fields: {origin_town: Ceduna, specialty: Psychiatry, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    destination_service_id: SVC-ADL-PSYC-01
+    expected:
+      outcome: not_eligible
+      must_cite: ["6.4.6"]
+      out_of_scope_notices: ["6.4.7"]
+      working: >-
+        Telehealth psychiatry is available at Ceduna Hospital (slots 6 and 20 Nov). Telehealth
+        counts as the nearest service (§6.4.6); no bypass reason is given. Travel to
+        Adelaide is not subsidised; the plan should offer telehealth. The nearest-service
+        requirement isn't met, so the plan shows the §6.4.7 not-assessed notice.
+    synthetic: true
+
+  - id: SC-10
+    category: nearest_service
+    title: Wanting to stay with family is not a reason to bypass
+    goal: >-
+      I'd like to see the eye specialist in Adelaide next month instead of the one that visits
+      Ceduna, so I can stay with my family in Adelaide. I live in Ceduna.
+    expected_fields: {origin_town: Ceduna, specialty: Ophthalmology, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {bypass_reason: family_support}
+    destination_service_id: SVC-ADL-OPHT-01
+    expected:
+      outcome: not_eligible
+      must_cite: ["6.4.6"]
+      out_of_scope_notices: ["6.4.7"]
+      working: >-
+        The Ceduna visiting clinic (12 Nov) is nearest. "Family support" is explicitly "not
+        sufficient grounds" to bypass the nearest service (§6.4.6 p. 8). Not eligible. The
+        nearest-service requirement isn't met, so the plan shows the §6.4.7 not-assessed notice.
+    synthetic: true
+
+  - id: SC-11
+    category: nearest_service
+    title: Valid documented bypass reason allows travel past telehealth
+    goal: My GP is referring me from Ceduna to an endocrinologist in Adelaide between 2 and 20 November.
+    expected_fields: {origin_town: Ceduna, specialty: Endocrinology, earliest_date: 2026-11-02, latest_date: 2026-11-20}
+    facts: {bypass_reason: clinical_risks_cannot_be_managed_regionally, gp_reason_documented: true}
+    destination_service_id: SVC-ADL-ENDO-01
+    expected:
+      outcome: eligible
+      must_cite: ["6.4.6", "8.1.1", "6.5"]
+      working: >-
+        Telehealth endocrinology exists in Ceduna (10 Nov), so Adelaide isn't nearest (§6.4.6).
+        The GP documents a listed bypass reason ("clinical risks cannot be managed in a regional
+        South Australian health facility", §6.4.6 p. 9), so the referral is valid. The referrer
+        must complete their part of the form (§8.1.1). Ceduna-Adelaide 780 km > 100 (§6.5).
+        Eligible.
+    synthetic: true
+
+  - id: SC-12
+    category: nearest_service
+    title: Bypass reason claimed but not documented by the GP goes to review
+    goal: I want to see an endocrinologist in Adelaide in November because the local wait is too long. I'm in Ceduna.
+    expected_fields: {origin_town: Ceduna, specialty: Endocrinology, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {bypass_reason: local_timeframe_clinically_unacceptable, gp_reason_documented: false}
+    destination_service_id: SVC-ADL-ENDO-01
+    expected:
+      outcome: needs_review
+      must_cite: ["6.4.6"]
+      working: >-
+        Telehealth endocrinology in Ceduna is nearest. The reason given is a listed bypass
+        criterion, but the GP must provide a valid medical reason (§6.4.6 p. 8) and none is
+        documented. The rule gives needs_review for a claimed but undocumented reason, routed
+        to an authorised officer (§8.3).
+    synthetic: true
+
+  - id: SC-13
+    category: nearest_service
+    title: Travelling to a visiting clinic that is the nearest service
+    goal: I live in Streaky Bay and need to get to the visiting eye clinic in Ceduna on 12 November.
+    expected_fields: {origin_town: Streaky Bay, specialty: Ophthalmology, earliest_date: 2026-11-12, latest_date: 2026-11-12}
+    destination_service_id: SVC-CED-OPHT-V1
+    expected:
+      outcome: eligible
+      must_cite: ["6.4.6", "6.5"]
+      working: >-
+        Nearest ophthalmology from Streaky Bay: Ceduna visiting clinic 110 km, Port Lincoln
+        visiting 300 km, Adelaide 700 km, so Ceduna is nearest (§6.4.6). Streaky Bay-Ceduna
+        110 km > 100 (§6.5). Visit on 12 Nov matches. Eligible.
+    synthetic: true
+
+  - id: SC-14
+    category: nearest_service
+    title: Visiting specialist can't see the client in time, so travel to their primary rooms
+    goal: >-
+      The visiting eye specialist in Ceduna can't fit me in soon enough, so they want me to see
+      them at their rooms in Adelaide next month. I live in Ceduna.
+    expected_fields: {origin_town: Ceduna, specialty: Ophthalmology, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {local_timeframe_clinically_acceptable: false, visiting_primary_rooms_service_id: SVC-ADL-OPHT-01, gp_reason_documented: true}
+    destination_service_id: SVC-ADL-OPHT-01
+    expected:
+      outcome: eligible
+      must_cite: ["6.4.6", "8.1.1"]
+      working: >-
+        A visiting specialist exists, but the client "is unable to be seen locally within a
+        clinically acceptable timeframe", so "the client will be supported to travel to the
+        visiting medical specialist's primary rooms" (§6.4.6 p. 8), here the Adelaide Eye Centre.
+        Travelling past the nearest service needs the referrer's part of the form (§8.1.1).
+        Eligible.
+    synthetic: true
+
+  # =============================================================== apy_lands (4)
+  - id: SC-15
+    category: apy_lands
+    title: Aboriginal APY Lands resident is covered by Nganampa Health, not PATS
+    goal: I'm an Aboriginal man from Pukatja and I need to see a heart specialist in Adelaide next month.
+    expected_fields: {origin_town: Pukatja (Ernabella), specialty: Cardiology, earliest_date: 2026-11-01, latest_date: 2026-11-30, indigenous_status: aboriginal}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: not_eligible
+      must_cite: ["6.1.1"]
+      working: >-
+        "Anangu living on the APY Lands are not eligible for PATS subsidies" (§6.1.1); their
+        travel is managed by Nganampa Health Council. Indigenous status aboriginal -> excluded. The plan should point to Nganampa Health Council, not PATS.
+    synthetic: true
+
+  - id: SC-16
+    category: apy_lands
+    title: Non-Aboriginal APY Lands resident is assessed normally
+    goal: I live in Pukatja, where I work as a teacher, and need a cardiology appointment in Adelaide in November.
+    expected_fields: {origin_town: Pukatja (Ernabella), specialty: Cardiology, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {indigenous_status: neither}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: eligible
+      must_cite: ["6.1.1", "6.5"]
+      working: >-
+        "Non-Aboriginal people residing in these communities will be eligible ... providing they
+        meet all other PATS eligibility criteria" (§6.1.1). Pukatja is the client's permanent home,
+        so the §6.1 itinerant-worker review doesn't apply. Pukatja-Adelaide 1400 km > 100
+        (§6.5); cardiology only in Adelaide in the dataset (no cross-border services modelled).
+        Eligible.
+    synthetic: true
+
+  - id: SC-17
+    category: apy_lands
+    title: Torres Strait Islander APY resident is not excluded and gets AES benefits
+    goal: I'm a Torres Strait Islander living in Pukatja and need to see a cardiologist in Adelaide next month with my partner.
+    expected_fields: {origin_town: Pukatja (Ernabella), specialty: Cardiology, earliest_date: 2026-11-01, latest_date: 2026-11-30, escort_requested: true, indigenous_status: torres_strait_islander}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: eligible
+      must_cite: ["6.1.1", "6.1.2", "7.2.8"]
+      entitlements: {escort: true}
+      working: >-
+        §6.1.1 excludes Aboriginal people on the APY Lands only; a Torres Strait Islander (not
+        Aboriginal) is not excluded. AES applies to Aboriginal and Torres Strait Islander
+        people (§6.1.2 intro), so the escort is automatic (§7.2.8, §7.2.9 table).
+        1400 km > 100 (§6.5). Eligible.
+    synthetic: true
+
+  - id: SC-18
+    category: apy_lands
+    title: APY resident who hasn't stated identity cannot be decided yet
+    goal: I live in Pukatja and need to see a heart specialist in Adelaide in November.
+    expected_fields: {origin_town: Pukatja (Ernabella), specialty: Cardiology, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: needs_review
+      must_cite: ["6.1.1"]
+      working: >-
+        §6.1.1 depends on whether the APY resident is Aboriginal. Indigenous status is
+        not_stated, so the engine must not assume. Outcome needs_review: ask the client or
+        route to an authorised officer (§8.3).
+    synthetic: true
+
+  # ================================================= aboriginal_engagement (3)
+  - id: SC-19
+    category: aboriginal_engagement
+    title: Aboriginal client without a concession card gets the advance and first night
+    goal: >-
+      I'm Aboriginal and live in Port Lincoln. I've just been given a cardiology appointment in
+      Adelaide in the week of 9 November and can't afford to pay for travel up front.
+    expected_fields: {origin_town: Port Lincoln, specialty: Cardiology, earliest_date: 2026-11-09, latest_date: 2026-11-15, indigenous_status: aboriginal}
+    facts: {concession_card: false, severe_financial_hardship: true, notice_business_days: 10}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: eligible
+      must_cite: ["6.1.2", "6.5.5", "7.3.1"]
+      entitlements: {advance: true, first_night_subsidised: true}
+      working: >-
+        Port Lincoln-Adelaide 645 km > 100 (§6.5); cardiology only in Adelaide. Advance: §6.5.5
+        would fail (no concession card; 10 days' notice is not less than five), but AES provides
+        subsidies in advance without the §6.5.5 tests (§6.1.2). First night: non-concession
+        holders normally pay the first night (§7.3.1), but AES removes the need for a concession
+        card (§6.1.2). Eligible, with both entitlements.
+    synthetic: true
+
+  - id: SC-20
+    category: aboriginal_engagement
+    title: Non-Aboriginal concession holder meets all advance criteria
+    goal: I live in Port Lincoln and have an urgent cardiology appointment in Adelaide on 12 November that I can't afford to travel to.
+    expected_fields: {origin_town: Port Lincoln, specialty: Cardiology, earliest_date: 2026-11-12, latest_date: 2026-11-12}
+    facts: {indigenous_status: neither, concession_card: true, severe_financial_hardship: true, notice_business_days: 3}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: eligible
+      must_cite: ["6.5.5", "7.3.1", "6.1.2"]
+      entitlements: {advance: true, first_night_subsidised: true}
+      working: >-
+        AES does not apply (indigenous_status neither; §6.1.2 cited as not applicable). §6.5.5:
+        valid concession card, severe financial hardship, 3 business days' notice < 5, so all
+        three criteria met; advance available. Concession holder, so the first night is
+        subsidised (§7.3.1). 645 km > 100. Eligible.
+    synthetic: true
+
+  - id: SC-21
+    category: aboriginal_engagement
+    title: Non-Aboriginal client without a concession card gets no advance or first night
+    goal: I'm in Whyalla and need to get to a cardiology appointment in Adelaide on 12 November but money is really tight.
+    expected_fields: {origin_town: Whyalla, specialty: Cardiology, earliest_date: 2026-11-12, latest_date: 2026-11-12}
+    facts: {indigenous_status: neither, concession_card: false, severe_financial_hardship: true, notice_business_days: 3}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: eligible
+      must_cite: ["6.5.5", "7.3.1", "6.1.2"]
+      entitlements: {advance: false, first_night_subsidised: false}
+      working: >-
+        Whyalla-Adelaide 385 km > 100; cardiology only in Adelaide: eligible overall. AES does not
+        apply. §6.5.5 needs a valid concession card, which is missing, so there is no advance even
+        with hardship and short notice. §7.3.1: non-concession holders pay the first night in full;
+        the second night is subsidised.
+    synthetic: true
+
+  # ================================================================== escort (3)
+  - id: SC-22
+    category: escort
+    title: Adult without an escort criterion is not entitled to an escort subsidy
+    goal: I'm going from Kimba to a cardiology appointment in Adelaide next month and would like my friend to come along.
+    expected_fields: {origin_town: Kimba, specialty: Cardiology, earliest_date: 2026-11-01, latest_date: 2026-11-30, escort_requested: true}
+    facts: {indigenous_status: neither, escort_criterion: null}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: eligible
+      must_cite: ["7.2.8", "7.2.9"]
+      entitlements: {escort: false}
+      working: >-
+        Kimba-Adelaide 470 km > 100; eligible. Escort: an escort is "required to be with a client
+        for specific medical reasons" (§7.2.8). An adult non-Indigenous client has no automatic
+        entitlement and no treating-specialist approval under a §7.2.9 criterion, so no escort
+        subsidy. The friend can travel, but unsubsidised.
+    synthetic: true
+
+  - id: SC-23
+    category: escort
+    title: Escort approved by the specialist for cognitive impairment
+    goal: My mum lives in Cleve and has an orthopaedic appointment in Adelaide in November; I need to go with her because of her memory problems.
+    expected_fields: {origin_town: Cleve, specialty: Orthopaedic surgery (general), earliest_date: 2026-11-01, latest_date: 2026-11-30, escort_requested: true}
+    facts: {indigenous_status: neither, client_age: 78, escort_criterion: Impairment, escort_specialist_approved: true}
+    destination_service_id: SVC-ADL-ORTH-01
+    expected:
+      outcome: eligible
+      must_cite: ["7.2.9", "7.2.8"]
+      entitlements: {escort: true}
+      working: >-
+        Cleve-Adelaide 520 km > 100; orthopaedics only in Adelaide. The treating specialist
+        approves an escort under the §7.2.9 "Impairment" criterion (cognitive impairment), so
+        one escort is subsidised (§7.2.8: one escort per client). Eligible.
+    synthetic: true
+
+  - id: SC-24
+    category: escort
+    title: Child is automatically entitled to an escort
+    goal: My 12-year-old son needs to see an orthopaedic surgeon in Adelaide next month. We live in Wudinna.
+    expected_fields: {origin_town: Wudinna, specialty: Orthopaedic surgery (general), earliest_date: 2026-11-01, latest_date: 2026-11-30, escort_requested: true}
+    facts: {indigenous_status: neither, client_age: 12}
+    destination_service_id: SVC-ADL-ORTH-01
+    expected:
+      outcome: eligible
+      must_cite: ["7.2.8"]
+      entitlements: {escort: true}
+      working: >-
+        Wudinna-Adelaide 570 km > 100; orthopaedics only in Adelaide. "Children who are 17 years
+        of age or under are automatically entitled to an escort" (§7.2.8); age 12 <= 17. The
+        parent escort must be 18 or older (§7.2.8). Eligible with escort.
+    synthetic: true
+
+  # ========================================================== air_vs_surface (3)
+  - id: SC-25
+    category: air_vs_surface
+    title: From Port Lincoln alone without a concession card, the bus is the most economical mode
+    goal: I'm in Port Lincoln and need to get to a cardiology appointment in Adelaide next month on my own.
+    expected_fields: {origin_town: Port Lincoln, specialty: Cardiology, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {indigenous_status: neither}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: eligible
+      must_cite: ["7.2.5", "7.2.1", "7.2.2", "7.3", "7.3.1"]
+      entitlements: {air_most_economical: false, surface_mode: public_transport}
+      working: >-
+        1 traveller, no concession card, not Aboriginal or Torres Strait Islander. Private vehicle
+        2 x 645 x 0.328 = 423.12; bus 120 x 2 = 240; surface = 240 (public transport). Only the
+        second night would be subsidised (§7.3.1), so + 1 x 110 -> 350. Air return 420.
+        350 < 420, so the bus is the most economical mode (§7.2, §7.2.5). Under the earlier reading
+        reading (two nights always counted) it was 460 > 420 and air; SC-26 is the same trip
+        with a concession card.
+    synthetic: true
+
+  - id: SC-26
+    category: air_vs_surface
+    title: From Port Lincoln alone with a concession card, flying is the most economical mode
+    goal: I'm in Port Lincoln, I have a Health Care Card, and I need to get to a cardiologist in Adelaide in November, just me.
+    expected_fields: {origin_town: Port Lincoln, specialty: Cardiology, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {indigenous_status: neither, concession_card: true}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: eligible
+      must_cite: ["7.2.5", "7.2.1", "7.2.2", "7.3", "7.3.1"]
+      entitlements: {air_most_economical: true}
+      working: >-
+        Same trip as SC-25 but with a concession card (a Health Care Card is accepted, §9.4).
+        Surface = 240 (bus, as in SC-25). Concession holders are subsidised for both nights
+        (§7.3.1), so + 2 x 110 = 220 -> 460. Air return 420. 460 > 420, so air is the most
+        economical mode (§7.2.5 item 2); no medical endorsement needed. With SC-25, this shows
+        the concession card changing the answer, as intended. (Re-worked in a follow-up:
+        the old Whyalla trip was bus under both readings, so it added nothing.)
+    synthetic: true
+
+  - id: SC-27
+    category: air_vs_surface
+    title: Specialist-authorised air travel for restricted mobility
+    goal: I live in Whyalla, use a wheelchair and have trouble getting on buses. I need to see the heart specialist in Adelaide in November.
+    expected_fields: {origin_town: Whyalla, specialty: Cardiology, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {indigenous_status: neither, air_medical_criterion: Restricted mobility, air_specialist_authorised: true}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: eligible
+      must_cite: ["7.2.5", "7.2.6"]
+      entitlements: {air_most_economical: false}
+      working: >-
+        On cost alone surface is cheaper: bus 75 x 2 = 150 (private vehicle 2 x 385 x 0.328 =
+        252.56), no concession card so + 1 x 110 for the second night (§7.3.1) -> 260 < air
+        460. But the treating specialist authorises air under the §7.2.6 "Restricted mobility"
+        criterion, so air is subsidised for medical reasons (§7.2.5 item 1), not as the most
+        economical mode. Eligible.
+    synthetic: true
+
+  # ===================================================== non_eligible_travel (1)
+  - id: SC-28
+    category: non_eligible_travel
+    title: Taxi and rental car are flagged as not subsidised
+    goal: >-
+      I need to get from Ceduna to my cardiology appointment in Adelaide next month. I was going
+      to get a taxi to the airport and hire a car in Adelaide.
+    expected_fields: {origin_town: Ceduna, specialty: Cardiology, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {indigenous_status: neither, requested_modes: [taxi, rental car]}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: eligible
+      must_cite: ["6.5.8"]
+      entitlements: {ineligible_modes_flagged: [taxi, rental car]}
+      working: >-
+        The journey itself is eligible (780 km > 100; cardiology only in Adelaide). §6.5.8 lists
+        "use of a taxi ... to or from airports" and "use of a rental car" as ineligible modes, so
+        the plan must flag both as not subsidised.
+    synthetic: true
+
+  # ================================================== specialty_not_accepted (1)
+  - id: SC-29
+    category: specialty_not_accepted
+    title: Physiotherapy is not an accepted medical speciality
+    goal: I want to see a physiotherapist in Adelaide next month. I live in Ceduna.
+    expected_fields: {origin_town: Ceduna, specialty: Physiotherapy, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    destination_service_id: SVC-ADL-PHYS-01
+    expected:
+      outcome: not_eligible
+      must_cite: ["9.2", "6.4.4"]
+      working: >-
+        Physiotherapy is not on the §9.2 list of accepted medical specialities, and allied health
+        professionals "do not meet PATS eligibility criteria" (§6.4.4). Not eligible, however far
+        the travel.
+    synthetic: true
+
+  # ================================================== ineligible_appointment (1)
+  - id: SC-30
+    category: ineligible_appointment
+    title: A second opinion is not covered
+    goal: I've already seen a cardiologist but want a second opinion from another one in Adelaide next month. I'm in Port Lincoln.
+    expected_fields: {origin_town: Port Lincoln, specialty: Cardiology, earliest_date: 2026-11-01, latest_date: 2026-11-30}
+    facts: {indigenous_status: neither, appointment_type: second_opinion}
+    destination_service_id: SVC-ADL-CARD-01
+    expected:
+      outcome: not_eligible
+      must_cite: ["6.4.5"]
+      working: >-
+        "appointments with a medical specialist for a second opinion" do not meet PATS
+        eligibility criteria (§6.4.5). Not eligible even though distance and nearest service pass.
+    synthetic: true

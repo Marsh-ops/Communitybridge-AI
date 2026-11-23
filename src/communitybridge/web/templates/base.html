@@ -1,0 +1,38 @@
+<!doctype html>
+{#- Base template every screen extends. Accessibility basics live here once, so no later
+    screen can forget them: language (WCAG 3.1.1), title (2.4.2), skip link (2.4.1), landmarks
+    (1.3.1), viewport that allows zoom (1.4.10). -#}
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}CommunityBridge AI{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <p class="site-name">CommunityBridge AI</p>
+    <nav aria-label="Main">
+      <ul class="nav-list">
+        <li><a href="/"{% if nav_current == "home" %} aria-current="page"{% endif %}>New request</a></li>
+        {% if journey_id %}<li><a href="/journeys/{{ journey_id }}/trace"{% if nav_current == "trace" %} aria-current="page"{% endif %}>Agent trace</a></li>{% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    {#- the core rule: say the data is synthetic, and never imply
+        that AHCSA or any ACCHO has approved this prototype. -#}
+    <p>
+      A prototype. All people, services and records shown are synthetic.
+      Not endorsed by any health service, AHCSA or ACCHO. It gives no clinical advice.
+    </p>
+  </footer>
+</body>
+</html>

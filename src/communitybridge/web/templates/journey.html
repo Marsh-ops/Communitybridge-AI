@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Your request - CommunityBridge AI{% endblock %}
+{% block content %}
+{% if status == "declined" %}
+<h1>You stopped this request</h1>
+<p>Nothing was booked, shared or sent.</p>
+{% elif bookings or withdrawals %}
+<h1>Your requests</h1>
+<p><span class="badge badge-simulated">SIMULATED</span> Nothing real was booked, paid for or sent. These are requests to made-up services.</p>
+{% elif confirmed %}
+<h1>Your plan is approved</h1>
+<p>Nothing has been booked or shared.</p>
+{% else %}
+<h1>Your request</h1>
+<p>This request is still being worked on. Nothing has been booked or shared.</p>
+{% endif %}
+
+{% if bookings %}
+<h2>Requests made</h2>
+<ul class="results">
+  {% for booking in bookings %}
+  <li><span class="badge badge-simulated">SIMULATED</span> {{ booking.kind }} {{ booking.reference }}: {{ booking.status }}. {{ booking.description }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if shared %}
+<h2>What was shared</h2>
+<p>Only these details, and only for the actions you approved.</p>
+<ul class="results">
+  {% for item in shared %}
+  <li>{{ item.recipient }}: {{ item.fields | join(", ") }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if withdrawals %}
+<h2>Withdrawn</h2>
+<ul class="results">
+  {% for item in withdrawals %}
+  <li>Consent withdrawn for {{ item.recipient }}. {{ item.message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if can_withdraw %}
+<h2>Changed your mind?</h2>
+<p>You can withdraw your consent for any action. Each is separate.</p>
+<form method="post" action="/journeys/{{ journey_id }}/withdraw">
+  {% for item in can_withdraw %}
+  <p>
+    {{ item.text }}<br>
+    <button type="submit" name="action" value="{{ item.action }}" class="secondary">Withdraw consent for {{ item.recipient }}</button>
+  </p>
+  {% endfor %}
+</form>
+{% endif %}
+
+<p class="links">
+  {% if has_plan %}<a href="/journeys/{{ journey_id }}/plan">View your plan</a>{% endif %}
+  <a href="/">Start a new request</a>
+</p>
+{% endblock %}

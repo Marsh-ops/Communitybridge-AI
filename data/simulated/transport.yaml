@@ -1,0 +1,22 @@
+# SIMULATED transport fixture. Fares and timetables are invented for testing.
+# Read by src/communitybridge/simulated/transport_api.py; every response carries simulated: true.
+# Bus fares are one way per person; air fares are return per person (as compared in PATS §7.2.5).
+# Private-vehicle cost is not here: it is calculated from the §7.2.1 rate in the rules YAML.
+# unavailable_dates: no seats on that day (SIMULATED). The Ceduna dates make both December
+# in-person windows in RP-01 (replan_scenarios.yaml) fail, so the re-planning path is testable.
+# November is untouched, so the core Ceduna journey (SC-01) never needs a re-plan.
+
+# The date these invented routes and fares were last checked against the test scenarios. A plan
+# option that uses a route cites it with this date, so the Verifier can check freshness.
+last_verified: 2026-10-26
+
+routes:
+  - {route_id: BUS-CED-ADL, mode: bus, from_town: CEDUNA, to_town: ADELAIDE, fare_aud: 138.00, fare_type: one_way, days: [Mon, Wed, Fri], depart: "06:30", arrive: "17:45", unavailable_dates: [2026-12-07, 2026-12-08, 2026-12-14, 2026-12-15], simulated: true, synthetic: true}
+  - {route_id: AIR-CED-ADL, mode: air, from_town: CEDUNA, to_town: ADELAIDE, fare_aud: 390.00, fare_type: return, days: [Mon, Tue, Wed, Thu, Fri], depart: "07:10", arrive: "08:40", unavailable_dates: [2026-12-07, 2026-12-08, 2026-12-14, 2026-12-15], simulated: true, synthetic: true}
+  - {route_id: BUS-STB-ADL, mode: bus, from_town: STREAKY_BAY, to_town: ADELAIDE, fare_aud: 130.00, fare_type: one_way, days: [Mon, Wed, Fri], depart: "07:45", arrive: "17:45", simulated: true, synthetic: true}
+  - {route_id: BUS-PLN-ADL, mode: bus, from_town: PORT_LINCOLN, to_town: ADELAIDE, fare_aud: 120.00, fare_type: one_way, days: [Mon, Tue, Wed, Thu, Fri, Sun], depart: "07:00", arrive: "16:30", simulated: true, synthetic: true}
+  - {route_id: AIR-PLN-ADL, mode: air, from_town: PORT_LINCOLN, to_town: ADELAIDE, fare_aud: 420.00, fare_type: return, days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], depart: "06:50", arrive: "07:40", simulated: true, synthetic: true}
+  - {route_id: BUS-WHY-ADL, mode: bus, from_town: WHYALLA, to_town: ADELAIDE, fare_aud: 75.00, fare_type: one_way, days: [Mon, Tue, Wed, Thu, Fri], depart: "08:00", arrive: "13:15", simulated: true, synthetic: true}
+  - {route_id: AIR-WHY-ADL, mode: air, from_town: WHYALLA, to_town: ADELAIDE, fare_aud: 460.00, fare_type: return, days: [Mon, Wed, Fri], depart: "07:30", arrive: "08:20", simulated: true, synthetic: true}
+  - {route_id: BUS-PAU-ADL, mode: bus, from_town: PORT_AUGUSTA, to_town: ADELAIDE, fare_aud: 60.00, fare_type: one_way, days: [Mon, Tue, Wed, Thu, Fri, Sat], depart: "09:00", arrive: "13:00", simulated: true, synthetic: true}
+  - {route_id: BUS-CED-PLN, mode: bus, from_town: CEDUNA, to_town: PORT_LINCOLN, fare_aud: 85.00, fare_type: one_way, days: [Tue, Thu], depart: "08:00", arrive: "13:30", simulated: true, synthetic: true}

@@ -1,0 +1,785 @@
+# PATS rules encoded from the PDF only.
+# Every rule: section ID and heading as in the PDF, source_page, and a verbatim source_quote
+# that sits entirely on that page.
+# Where the wording needed interpreting, `interpretation` explains how it was read.
+# Thresholds live here, never in code; numeric parameters must appear in their own quote.
+
+guideline_version: "26.4"
+source_file: SA Health PATS Guidelines for Assessment V26.4 (PDF, not included in this repository)
+effective_date: null
+effective_date_note: >-
+  Not stated in the source. Every page header reads "PATS Guidelines for Assessment, 2026 V 26.4",
+  but the §9.6 change history (p. 24) lists versions only up to 26.3 (June 2026).
+last_verified: 2026-10-11
+
+heading_only_sections:
+  - section: "6.6"
+    title: Accommodation
+    source_page: 11
+    source_quote: Accommodation
+    note: Heading with no body text in the PDF; its content is in 6.6.1 (rules PATS-6.6.1-*).
+
+referenced_sections:
+  - section: "8.3"
+    title: Authorised officers
+    source_page: 19
+    source_quote: >-
+      An authorised officer is a person who works with a referring practitioner or medical
+      specialist and can complete the necessary details of a PATS application on their behalf.
+    note: >-
+      Not a rule. Any needs_review outcome is routed to an authorised officer, who can include
+      Aboriginal Health Practitioners/Aboriginal Liaison Officers.
+  - section: "9.6"
+    title: Version control and change history
+    source_page: 24
+    source_quote: Version control and change history
+    note: Source of the guideline version history; the 26.4 effective date is not listed.
+
+assumed_preconditions:
+  - section: "6.2"
+    title: Medicare enrolment
+    source_page: 5
+    source_quote: >-
+      To be eligible for PATS, a client must be enrolled with Medicare and have a valid Medicare card.
+    note: Assumed true for every scenario and stated in the plan; not evaluated.
+  - section: "6.3"
+    title: Financial assistance from other providers
+    source_page: 5
+    source_quote: >-
+      To be eligible for PATS, a client must not receive, or be eligible for, financial assistance
+      for travel and accommodation from other providers.
+    note: Assumed true for every scenario and stated in the plan; not evaluated.
+
+out_of_scope_sections:
+  - section: "6.5.1"
+    title: Cumulative Travel
+    source_page: 9
+    source_quote: >-
+      To be eligible for Cumulative Travel a patient must be travelling between 50km and 100km (one
+      way) from their residence to treatment location and travelling over 300km cumulatively per
+      week (forward and return). Eligibility is restricted to Oncology and Renal/Dialysis treatment.
+    note: >-
+      Out of scope in the submitted project plan, so never evaluated. Shown whenever the distance
+      requirement (§6.5, or the §6.5.3 band) isn't met, so the client is referred to a person
+      instead of only being told "not eligible".
+    shown_when: distance_requirement_not_met
+    user_message: >-
+      This prototype doesn't assess PATS Cumulative Travel (§6.5.1), which can cover some regular
+      oncology or renal/dialysis trips under 100 km. Ask your ACCHO health worker or PATS to check
+      whether it applies to you.
+
+  - section: "6.4.7"
+    title: Life-limiting illness (terminally ill)
+    source_page: 9
+    source_quote: >-
+      PATS will support the client to attend the specialist of their choice and not require them
+      to access a specialist service nearer to their home, should one be available.
+    note: >-
+      Out of scope: it overrides the §6.4.6 nearest-service test, but it needs the
+      client's prognosis, which this prototype does not collect. Never evaluated. Shown whenever
+      the nearest-service requirement isn't met, so the client is referred to a person instead of
+      only being told "not eligible".
+    shown_when: nearest_service_requirement_not_met
+    user_message: >-
+      This prototype doesn't assess PATS §6.4.7 (life-limiting illness), which can let a client
+      whose treating specialist expects a life expectancy of 12 months or less attend the
+      specialist of their choice. Ask your ACCHO health worker or PATS to check whether it
+      applies to you.
+
+rules:
+  # ---------------------------------------------------------------- residency (§6.1)
+  - rule_id: PATS-6.1-RESIDENCY
+    section: "6.1"
+    title: Residency
+    type: gate
+    parameters:
+      requires_permanent_sa_residence: true
+      ineligible_situations: [on holidays, visiting family and friends]
+      needs_review_situations: [itinerant worker]
+    source_page: 4
+    source_quote: >-
+      Holiday accommodations are not considered to be permanent residences. Itinerant workers in
+      South Australia who need to access medical services will be considered. Clients who are on
+      holidays or visiting family and friends interstate or within the state are not eligible for
+      subsidy.
+    plain_summary: >-
+      You must live permanently in South Australia. People on holiday or visiting family are not
+      covered. Itinerant workers are considered case by case by a PATS officer.
+    interpretation: '"will be considered" is discretionary, so itinerant workers get needs_review.'
+
+  - rule_id: PATS-6.1.1-APY
+    section: "6.1.1"
+    title: APY Lands residents authorised
+    type: exclusion
+    parameters:
+      excluded_indigenous_status: [aboriginal, both]
+      applies_to_residents_of: APY Lands
+      not_stated_outcome: needs_review
+    source_page: 4
+    source_quote: >-
+      Accordingly, Anangu living on the APY Lands are not eligible for PATS subsidies.
+      Non-Aboriginal people residing in these communities will be eligible for PATS subsidies
+      providing they meet all other PATS eligibility criteria.
+    plain_summary: >-
+      Aboriginal people living on the APY Lands are not covered by PATS because Nganampa Health
+      Council arranges their travel. Non-Aboriginal APY residents are assessed normally.
+    interpretation: Applies to indigenous_status aboriginal or both, as the PDF names Aboriginal people only; an APY resident whose identity is not_stated gets needs_review, because the outcome depends on it.
+
+  # ---------------------------------------------------- Aboriginal Engagement Strategy (§6.1.2)
+  - rule_id: PATS-6.1.2-ADVANCE
+    section: "6.1.2"
+    title: Aboriginal Engagement Strategy
+    type: entitlement
+    parameters:
+      applies_to_indigenous_status: [aboriginal, torres_strait_islander, both]
+      waives_rule: PATS-6.5.5-ADVANCE
+      not_stated_outcome: ask
+    source_page: 4
+    source_quote: >-
+      The Aboriginal Engagement Strategy has been developed to provide greater support to
+      Aboriginal and Torres Strait Islander people that have no option other than to travel for
+      necessary treatment. Benefits for Aboriginal people include: Providing subsidies in advance.
+    plain_summary: >-
+      Aboriginal and Torres Strait Islander clients can receive travel subsidies in advance.
+    interpretation: Advance available without the §6.5.5 tests; applies to Aboriginal and Torres Strait Islander clients.
+
+  - rule_id: PATS-6.1.2-FIRST-NIGHT
+    section: "6.1.2"
+    title: Aboriginal Engagement Strategy
+    type: entitlement
+    parameters:
+      applies_to_indigenous_status: [aboriginal, torres_strait_islander, both]
+      waives_concession_card_requirement_for: first night accommodation subsidy
+      not_stated_outcome: ask
+    source_page: 5
+    source_quote: >-
+      Removing the need for a concession card to receive the first night of accommodation subsidy.
+    plain_summary: >-
+      Aboriginal and Torres Strait Islander clients get the first night's accommodation subsidy
+      even without a concession card.
+    interpretation: Applies to Aboriginal and Torres Strait Islander clients.
+
+  - rule_id: PATS-6.1.2-ESCORT
+    section: "6.1.2"
+    title: Aboriginal Engagement Strategy
+    type: entitlement
+    parameters:
+      applies_to_indigenous_status: [aboriginal, torres_strait_islander, both]
+      not_stated_outcome: ask
+    source_page: 5
+    source_quote: Automatic approval for an escort.
+    plain_summary: Aboriginal and Torres Strait Islander clients are automatically approved for an escort.
+    interpretation: Automatic; no treating-specialist approval needed.
+
+  # --------------------------------------------------------- specialists (§6.4.1, §6.4.2, §9.2)
+  - rule_id: PATS-6.4.1-RECOGNISED
+    section: "6.4.1"
+    title: Recognised medical specialists
+    type: gate
+    parameters:
+      accepted_specialities_rule: PATS-9.2-SPECIALITIES
+    source_page: 6
+    source_quote: >-
+      The medical appointment must be with a person who is recognised as a specialist under the
+      Medical Board of Australia, registered with Medicare Australia with a specialty code
+    plain_summary: The appointment must be with a recognised medical specialist.
+
+  - rule_id: PATS-6.4.1-SUBSPECIALTIES
+    section: "6.4.1"
+    title: Recognised medical specialists
+    type: gate
+    parameters:
+      accepted_subspecialties:
+        general surgery: [breast, endocrine]
+        gynaecology:
+          - gynaecological oncology
+          - maternal foetal medicine
+          - reproductive endocrinology and infertility
+          - urogynaecology
+        orthopaedic surgery: [foot, ankle, spinal]
+        ophthalmology: [neuro-ophthalmology]
+    source_page: 7
+    source_quote: >-
+      Where applicable, appointments with medical practitioners recognised in the following
+      sub-specialties will be accepted by PATS:
+    plain_summary: Some sub-specialties (for example breast surgery or spinal surgery) are also accepted.
+
+  - rule_id: PATS-6.4.2-APPROVED-SERVICES
+    section: "6.4.2"
+    title: Approved medical specialist services.
+    type: gate
+    parameters:
+      approved_services:
+        - Pregnancy Advisory Centre (PAC)
+        - BreastScreen SA
+        - chemotherapy
+        - radiology services (only when referred by a GP or approved medical specialist)
+        - renal dialysis
+        - clients admitted to country hospitals
+        - inpatient rehabilitation services
+        - Prosthetic/Orthotic services
+        - Yarrow Place (WCH Forensic Testing)
+    source_page: 7
+    source_quote: >-
+      The below medical specialist services with a Commonwealth Medicare Benefits Schedule item
+      number are eligible for PATS subsidies:
+    plain_summary: Some specialist services, such as chemotherapy and renal dialysis, are also covered.
+
+  - rule_id: PATS-9.2-SPECIALITIES
+    section: "9.2"
+    title: Accepted medical specialities
+    type: gate
+    parameters:
+      accepted_specialities:
+        - Addiction medicine
+        - Anaesthetics
+        - Breast surgery
+        - Cardiology
+        - Cardio-thoracic surgery
+        - Dermatology
+        - Emergency
+        - Endocrinology
+        - Gastroenterology and hepatology
+        - General medicine
+        - General surgery
+        - Genetics (clinical)
+        - Geriatrics
+        - Immunology and allergy
+        - Infectious diseases
+        - Intensive care medicine
+        - Nephrology
+        - Neurology
+        - Neurosurgery
+        - Obstetrics and gynaecology (general)
+        - Obstetrics and gynaecology (reproductive endocrinology and infertility)
+        - Occupational and environmental medicine
+        - Oncology (haematology)
+        - Oncology (medical)
+        - Oncology (radiation)
+        - Ophthalmology
+        - Oral maxillofacial surgery
+        - Orthopaedic surgery (foot/ankle)
+        - Orthopaedic surgery (general)
+        - Orthopaedic surgery (paediatric)
+        - Orthopaedic surgery (spinal)
+        - Otolaryngology(head and neck surgery)
+        - Paediatric cardiology
+        - Paediatric (general)
+        - Paediatric (medical oncology)
+        - Paediatric (neonatal and perinatal)
+        - Paediatric surgery
+        - Palliative medicine
+        - Pharmacology (clinical)
+        - Plastic and reconstructive surgery
+        - Psychiatry
+        - Rehabilitation medicine
+        - Respiratory and sleep medicine
+        - Rheumatology
+        - Sexual health medicine
+        - Sports medicine
+        - Urology
+        - Vascular surgery
+    source_page: 22
+    source_quote: Addiction medicine Anaesthetics Breast surgery Cardiology
+    plain_summary: The specialty must be on the PATS list of accepted medical specialities.
+
+  # ---------------------------------------------------------------- exclusions (§6.4.4, §6.4.5)
+  - rule_id: PATS-6.4.4-INELIGIBLE-PROFESSIONALS
+    section: "6.4.4"
+    title: Ineligible health professional services
+    type: exclusion
+    parameters:
+      ineligible_professionals:
+        - allied health professionals
+        - all dental services with the exception of 6.4.3
+        - any dental extraction even if provided by a dental specialist is not eligible
+        - nursing and midwifery professionals
+        - General Practitioners (GPs)
+    source_page: 8
+    source_quote: >-
+      The following health professionals are not classified as medical specialists and do not
+      meet PATS eligibility criteria:
+    plain_summary: Appointments with GPs, allied health, nursing or most dental services are not covered.
+
+  - rule_id: PATS-6.4.5-INELIGIBLE-APPOINTMENTS
+    section: "6.4.5"
+    title: Ineligible appointments
+    type: exclusion
+    parameters:
+      ineligible_situations:
+        - clinical trials or experimental treatments other than phase IV trials
+        - appointments with a medical specialist for a second opinion
+        - surgery provided for cosmetic reasons only
+        - monitoring programs
+    source_page: 8
+    source_quote: The following situations do not meet PATS eligibility criteria
+    plain_summary: Second opinions, cosmetic surgery, monitoring programs and most trials are not covered.
+
+  # ------------------------------------------------------- nearest service (§6.4.6, §8.1.1)
+  - rule_id: PATS-6.4.6-NEAREST
+    section: "6.4.6"
+    title: Nearest medical specialist service
+    type: gate
+    parameters:
+      counted_service_modes: [resident, visiting, telehealth]
+    source_page: 8
+    source_quote: >-
+      PATS travel subsidies are available to clients who access their nearest medical specialist
+      service. The local hospital will have a list of medical specialists within the region
+      including resident, visiting or digital telehealth services available.
+    plain_summary: >-
+      PATS only helps with travel to the nearest specialist service, and a visiting or telehealth
+      service counts. If a closer service can see you, travel further away is not covered unless a
+      listed reason applies.
+    interpretation: Nearest wins; telehealth and visiting count; travel past them needs a valid bypass reason.
+
+  - rule_id: PATS-6.4.6-NOT-GROUNDS
+    section: "6.4.6"
+    title: Nearest medical specialist service
+    type: exclusion
+    parameters:
+      insufficient_reasons:
+        - Family support
+        - continuity of care
+        - free accommodation
+        - a preferred place of treatment
+        - personal convenience
+    source_page: 8
+    source_quote: >-
+      Family support, continuity of care, free accommodation, a preferred place of treatment, or
+      personal convenience are not sufficient grounds to waiver the criteria to use the nearest
+      medical specialist service, regardless of whether that is a visiting medical specialist or
+      digital telehealth service.
+    plain_summary: Personal reasons such as family support or convenience do not allow you to bypass the nearest service.
+
+  - rule_id: PATS-6.4.6-NOT-LEGITIMATE
+    section: "6.4.6"
+    title: Nearest medical specialist service
+    type: exclusion
+    parameters:
+      insufficient_reasons:
+        - Special interest in a particular area of specialty
+        - bypassing waiting lists for non-urgent treatment
+    source_page: 8
+    source_quote: >-
+      Special interest in a particular area of specialty or bypassing waiting lists for
+      non-urgent treatment are not
+    plain_summary: >-
+      A special interest in one area of a specialty, or skipping a waiting list for non-urgent
+      treatment, is not a legitimate reason to bypass a closer specialist.
+    interpretation: >-
+      The sentence runs onto page 9 ("considered legitimate reasons to bypass a closer
+      specialist"); the quote stops at the end of page 8. Added because the first pass left it
+      out.
+
+  - rule_id: PATS-6.4.6-VISITING-PRIMARY-ROOMS
+    section: "6.4.6"
+    title: Nearest medical specialist service
+    type: entitlement
+    parameters:
+      condition: visiting specialist cannot see client locally within a clinically acceptable timeframe
+      supported_destination: visiting specialist's primary rooms
+    source_page: 8
+    source_quote: >-
+      If there is a visiting medical specialist and the client is unable to be seen locally within
+      a clinically acceptable timeframe, the client will be supported to travel to the visiting
+      medical specialist’s primary rooms.
+    plain_summary: >-
+      If a visiting specialist can't see you locally in a clinically acceptable time, you can be
+      supported to travel to that specialist's main rooms.
+
+  - rule_id: PATS-6.4.6-GP-REASON
+    section: "6.4.6"
+    title: Nearest medical specialist service
+    type: gate
+    parameters:
+      outcome_if_reason_claimed_but_undocumented: needs_review
+    source_page: 8
+    source_quote: >-
+      The client’s GP must provide a valid medical reason to refer to a medical service other than
+      the nearest provider.
+    plain_summary: To see someone other than the nearest specialist, your GP must give a valid medical reason.
+    interpretation: '"valid medical reason" is discretionary; undocumented reasons get needs_review.'
+
+  - rule_id: PATS-6.4.6-BYPASS
+    section: "6.4.6"
+    title: Nearest medical specialist service
+    type: gate
+    parameters:
+      valid_bypass_reasons:
+        - local_timeframe_clinically_unacceptable
+        - clinical_risks_cannot_be_managed_regionally
+        - cannot_be_treated_in_sa
+      timeframe_bypass_max_months: 12
+      cannot_be_treated_in_sa_referral_from: SA Health tertiary health site
+    source_page: 9
+    source_quote: >-
+      Referrals to an alternative medical service (not the nearest) are required to meet one of the
+      following criteria for the claim to be valid: The timeframe to be seen locally is clinically
+      unacceptable (in which case the client may be paid PATS subsidies for up to 12 months). The
+      client’s clinical risks cannot be managed in a regional South Australian health facility. The
+      client cannot be treated in South Australia (these referrals are only accepted from a SA
+      Health tertiary health site).
+    plain_summary: >-
+      Travelling past the nearest service is only covered if the local wait is clinically unsafe
+      (for up to 12 months), the risks can't be managed regionally, or treatment isn't available
+      in South Australia.
+
+  - rule_id: PATS-8.1.1-REFERRER
+    section: "8.1.1"
+    title: The referring practitioner
+    type: gate
+    parameters:
+      referrer_part_required_when:
+        - needs to travel past their nearest specialist
+        - is attending a radiology appointment
+        - requires an advance for air travel
+    source_page: 18
+    source_quote: >-
+      The referring practitioner (or authorised representative) is only to complete the ‘Referring
+      practitioner details’ part on the application form if the client: needs to travel past their
+      nearest specialist is attending a radiology appointment requires an advance for air travel.
+    plain_summary: >-
+      If you travel past your nearest specialist, have a radiology appointment, or need an advance
+      for air travel, your referring doctor must fill in their part of the form.
+
+  # ------------------------------------------------------------------- distance (§6.5 – §6.5.3)
+  - rule_id: PATS-6.5-DISTANCE
+    section: "6.5"
+    title: Travel
+    type: gate
+    parameters:
+      threshold_km: 100
+      comparison: greater_than
+      distance_basis: one way, shortest most direct route
+    source_page: 9
+    source_quote: >-
+      To be eligible for PATS, clients are required to travel more than 100km from their place of
+      residence to the actual treatment location by the shortest, most direct route.
+    plain_summary: You must travel more than 100 km (one way) from home to the treatment location.
+    interpretation: Exactly 100 km is not "more than 100km"; it falls to the §6.5.3 band (§6.5.1 is out of scope,).
+
+  - rule_id: PATS-6.5-AWAY-FROM-HOME
+    section: "6.5"
+    title: Travel
+    type: exclusion
+    parameters:
+      ineligible_situations: [travelling while away from residence]
+    source_page: 9
+    source_quote: >-
+      Clients who are travelling to access treatment while away from their residence, for example
+      while on holidays or interstate, are not eligible for PATS.
+    plain_summary: Travel that starts while you are away from home (for example on holiday) is not covered.
+
+  - rule_id: PATS-6.5.2-CALCULATOR
+    section: "6.5.2"
+    title: Distance calculator
+    type: calculation
+    parameters:
+      prototype_distance_source: data/geo/towns_distances.csv (synthetic stand-in for the PATS calculator)
+    source_page: 9
+    source_quote: >-
+      The PATS distance calculation tool accurately determines the distance travelled from the
+      client’s permanent place of residence to their actual treatment location.
+    plain_summary: >-
+      Distance is measured from your permanent home to the treatment location. The prototype uses
+      a synthetic distance table in place of the official PATS calculator.
+
+  - rule_id: PATS-6.5.3-SAFETY
+    section: "6.5.3"
+    title: Distance vs Safety
+    type: gate
+    parameters:
+      min_km: 90
+      max_km: 100
+      bounds_inclusive: true
+      alternate_route_km_over: 100
+      lethargic_treatments: [chemotherapy, radiation]
+      all_criteria_required: true
+    source_page: 10
+    source_quote: >-
+      To be eligible for a subsidy when the shortest distance calculated by the PATS distance
+      calculator is between 90km and 100km the following criteria must be met: alternate distance
+      provided by Google maps is over 100km the treatment performed makes the client lethargic
+      i.e. chemotherapy or radiation
+    plain_summary: >-
+      If the shortest distance is 90–100 km, you may still be covered when another route is over
+      100 km and your treatment (chemotherapy or radiation) leaves you lethargic.
+    interpretation: Inclusive 90–100 km band; "i.e." read as a closed list of chemotherapy or radiation.
+
+  # -------------------------------------------------------------- advance subsidy (§6.5.5)
+  - rule_id: PATS-6.5.5-ADVANCE
+    section: "6.5.5"
+    title: Advance travel subsidy requests
+    type: entitlement
+    parameters:
+      criteria_all_required:
+        - hold a valid concession card
+        - be experiencing severe financial hardship
+        - received less than five business days notice of an appointment
+      notice_business_days_less_than: 5
+      waived_by_rule: PATS-6.1.2-ADVANCE
+    source_page: 10
+    source_quote: >-
+      To be eligible for an advance, the client must: hold a valid concession card be experiencing
+      severe financial hardship have received less than five business days’ notice of an appointment
+      and can provide evidence of this to PATS.
+    plain_summary: >-
+      An advance needs a concession card, severe financial hardship and less than five business
+      days' notice. Aboriginal and Torres Strait Islander clients don't need these (§6.1.2).
+    interpretation: Not applied to Aboriginal and Torres Strait Islander clients.
+
+  # -------------------------------------------------------------- non-eligible travel (§6.5.8)
+  - rule_id: PATS-6.5.8-NON-ELIGIBLE-TRAVEL
+    section: "6.5.8"
+    title: Non-eligible travel
+    type: exclusion
+    parameters:
+      ineligible_modes:
+        - taxi
+        - shuttle bus
+        - Uber or other ride sharing platform
+        - rental car
+        - ambulance
+        - Royal Flying Doctor Service
+        - emergency vehicle
+        - inter-hospital transfer
+    source_page: 11
+    source_quote: >-
+      The following modes of travel are ineligible for PATS travel subsidies: use of a taxi, shuttle
+      bus, Uber or other ride sharing platform to or from airports, medical appointments or
+      accommodation use of a rental car travel by ambulance, Royal Flying Doctor Service or emergency
+      vehicle travel that has been undertaken as part of an inter-hospital transfer.
+    plain_summary: Taxis, ride-share, shuttles, rental cars and emergency transport are not subsidised.
+
+  # ------------------------------------------------------------------- accommodation (§6.6.1)
+  - rule_id: PATS-6.6.1-COMMERCIAL
+    section: "6.6.1"
+    title: Eligible accommodation
+    type: gate
+    parameters:
+      required_accommodation_type: commercial (has an ABN)
+    source_page: 11
+    source_quote: >-
+      To be eligible for an accommodation subsidy, a client and/or an approved escort are required
+      to stay in commercial accommodation. Commercial accommodation is accommodation that has an
+      Australian business number (ABN)
+    plain_summary: Accommodation is only subsidised in commercial accommodation (a business with an ABN).
+
+  - rule_id: PATS-6.6.1-FAMILY
+    section: "6.6.1"
+    title: Eligible accommodation
+    type: exclusion
+    parameters:
+      ineligible_accommodation: [staying with family or friends]
+    source_page: 11
+    source_quote: There is no subsidy payment available for a client who stays with family or friends.
+    plain_summary: Staying with family or friends is not subsidised.
+
+  # ------------------------------------------------------------- travel subsidy (§7.2 – §7.2.6)
+  - rule_id: PATS-7.2-MOST-ECONOMICAL
+    section: "7.2"
+    title: Travel subsidy
+    type: calculation
+    parameters:
+      surface_modes: [car, bus, rail, passenger ferry]
+    source_page: 13
+    source_quote: >-
+      Travel subsidies are calculated on the most economical mode of travel appropriate for the
+      client’s functional ability and medical condition. In the case of surface travel, this may
+      include car, bus, rail and passenger ferry.
+    plain_summary: The subsidy is based on the cheapest suitable way to travel.
+
+  - rule_id: PATS-7.2.1-PRIVATE-VEHICLE
+    section: "7.2.1"
+    title: Private vehicle
+    type: calculation
+    parameters:
+      rate_cents_per_km: 32.8
+      rate_applies_to_appointments_from: 1/7/2024
+      one_application_per_vehicle: true
+      annual_increase_note: The PDF says the rate is subject to an annual increase but gives no newer figure.
+    source_page: 13
+    source_quote: >-
+      PATS reimburses private vehicle travel at 32.8 cents per km (appointments from 1/7/2024).
+      If there are multiple clients travelling in one vehicle, only one application for travel
+      reimbursement is eligible for subsidy.
+    plain_summary: Driving your own car is subsidised at 32.8 cents per km.
+    interpretation: Used for the surface-cost side of the air comparison, at the printed rate.
+
+  - rule_id: PATS-7.2.2-PUBLIC-TRANSPORT
+    section: "7.2.2"
+    title: Public transport
+    type: calculation
+    parameters:
+      fare_basis: standard priced ticket
+    source_page: 13
+    source_quote: A subsidy for public transport will be calculated based on a standard priced ticket.
+    plain_summary: Bus or train travel is subsidised at the standard ticket price.
+
+  - rule_id: PATS-7.2.5-AIR-MEDICAL
+    section: "7.2.5"
+    title: Commercial air travel
+    type: entitlement
+    parameters:
+      criteria_rule: PATS-7.2.6-AIR-CRITERIA
+    source_page: 14
+    source_quote: >-
+      Air travel is subsidised in any of the following situations: 1. The medical specialist or
+      authorised officer confirms that the client is unable to travel by surface mode of travel for
+      medical reasons (refer to section 7.2.5).
+    plain_summary: Flights are covered if a specialist or authorised officer confirms you can't travel by road for medical reasons.
+    interpretation: The PDF's "(refer to section 7.2.5)" points to itself; read as the §7.2.6 criteria.
+
+  - rule_id: PATS-7.2.5-AIR-ECONOMICAL
+    section: "7.2.5"
+    title: Commercial air travel
+    type: calculation
+    parameters:
+      comparison_accommodation_nights: 2
+      nights_counted: subsidised_only
+      nights_rule: PATS-7.3.1-NIGHTS
+      surface_cost: min(private vehicle return km x rate, standard public transport fare x travellers)
+      include_escort_if_authorised: true
+      medical_endorsement_required: false
+    source_page: 14
+    source_quote: >-
+      When the combined costs of surface travel and two nights of accommodation subsidy is more than
+      return air travel, air travel may be considered as the most economical mode of travel. In
+      these circumstances only, a medical endorsement for air travel is not required. The total
+      eligible subsidy payable must take into consideration the cost of the client, and an escort if
+      medically authorised, and the concession card status of the client.
+    plain_summary: >-
+      If driving or the bus plus two nights' accommodation would cost more than return flights,
+      flying counts as the cheapest option. No medical approval is needed in that case.
+    interpretation: Surface = cheaper of private vehicle and public transport. Of the two nights, only those §7.3.1 would actually subsidise are added, because the PDF says concession card status must be taken into consideration. Without a concession card that is the second night only, unless §6.1.2 waives the first-night rule.
+
+  - rule_id: PATS-7.2.5-AIR-NO-SUITABLE-PT
+    section: "7.2.5"
+    title: Commercial air travel
+    type: entitlement
+    parameters:
+      authorised_by: regional LHN local authorising clinician
+      outcome_without_authorisation: needs_review
+    source_page: 14
+    source_quote: >-
+      Air travel may be authorised when the most economical public transport option does not provide
+      an appropriate travel option to the nearest specialist. This authorisation must be provided by
+      a regional LHN local authorising clinician.
+    plain_summary: Flights may be approved by a local clinician when public transport doesn't suit.
+    interpretation: '"may be authorised" is discretionary, so needs_review.'
+
+  - rule_id: PATS-7.2.5-SURCHARGES
+    section: "7.2.5"
+    title: Commercial air travel
+    type: exclusion
+    parameters:
+      excluded_costs:
+        - credit card charges
+        - booking fees
+        - mobile phone notifications
+        - excess baggage charges
+        - travel insurance
+    source_page: 14
+    source_quote: >-
+      The subsidy for eligible travel will only cover the actual fare cost – surcharges (credit card
+      charges, booking fees, mobile phone notifications, excess baggage charges, travel insurance,
+      etc.) are not included in the PATS subsidy.
+    plain_summary: Only the fare itself is covered, not booking fees, baggage or insurance.
+
+  - rule_id: PATS-7.2.6-AIR-CRITERIA
+    section: "7.2.6"
+    title: Commercial air travel criteria
+    type: gate
+    parameters:
+      authorised_by: treating medical specialist
+      criteria: [Active clinical management, Pain management, Clinical urgency, Restricted mobility]
+    source_page: 14
+    source_quote: >-
+      If a client is required to travel by air for medical reasons, the treating medical specialist
+      must authorise this on the client’s application form using one of the following criteria.
+    plain_summary: For medical air travel, the treating specialist must approve it under one of four listed criteria.
+
+  # ------------------------------------------------------------------ escort (§7.2.8, §7.2.9)
+  - rule_id: PATS-7.2.8-ESCORT
+    section: "7.2.8"
+    title: Escort travel
+    type: entitlement
+    parameters:
+      max_escorts_per_client: 1
+      automatic_for_indigenous_status: [aboriginal, torres_strait_islander, both]
+      not_stated_outcome: ask
+      automatic_child_max_age: 17
+      escort_min_age: 18
+    source_page: 15
+    source_quote: >-
+      An escort is defined as a person who is required to be with a client for specific medical
+      reasons, with each client being entitled to one escort only. Aboriginal patients are
+      automatically entitled to an escort. Children who are 17 years of age or under are
+      automatically entitled to an escort. Approved escorts must meet the following requirements:
+      18 years or older
+    plain_summary: >-
+      You can have one escort. Aboriginal and Torres Strait Islander clients and children 17 or
+      under get one automatically. The escort must be 18 or older.
+    interpretation: Automatic for Aboriginal and Torres Strait Islander clients, without specialist approval.
+
+  - rule_id: PATS-7.2.9-ESCORT-AUTH
+    section: "7.2.9"
+    title: Authorisation of escort
+    type: gate
+    parameters:
+      authorised_by: treating medical specialist
+      criteria:
+        - Impairment
+        - Active role of carer
+        - Client is a child
+        - Aboriginal and/or Torres Strait Islander people
+        - Necessary assistance
+        - As an alternative to air travel
+      automatic_criteria: [Client is a child, Aboriginal and/or Torres Strait Islander people]
+    source_page: 15
+    source_quote: >-
+      When requesting a travel subsidy for an escort, a client must have approval of the treating
+      medical specialist.
+    plain_summary: >-
+      Otherwise, an escort needs the treating specialist's approval under one of the listed
+      criteria (for example impairment or carer role).
+    interpretation: Specialist approval applies only to non-automatic criteria.
+
+  # ----------------------------------------------------------- accommodation (§7.3, §7.3.1)
+  - rule_id: PATS-7.3-RATES
+    section: "7.3"
+    title: Accommodation subsidy
+    type: calculation
+    parameters:
+      max_per_person_per_night_aud: 110
+      max_patient_and_escort_per_night_aud: 154
+      pay_actual_cost_if_lower: true
+    source_page: 16
+    source_quote: >-
+      Subsidies are available up to $110 per person, per night. An accommodation subsidy for a
+      patient and authorised escort will be available up to $154 per night. If the cost of the
+      accommodation is less than the maximum subsidy rate, the actual amount of accommodation will
+      be paid.
+    plain_summary: >-
+      Accommodation is subsidised up to $110 a night for one person, or $154 a night for a client
+      and escort, or the actual cost if lower.
+
+  - rule_id: PATS-7.3.1-NIGHTS
+    section: "7.3.1"
+    title: Authorisation of accommodation
+    type: entitlement
+    parameters:
+      nights_without_medical_authorisation: 2
+      concession_first_night_subsidised: true
+      non_concession_first_night_subsidised: false
+      first_night_concession_waived_by_rule: PATS-6.1.2-FIRST-NIGHT
+    source_page: 16
+    source_quote: >-
+      Clients are eligible to apply for an accommodation subsidy for up to two nights without medical
+      authorisation. Concession card holders are automatically eligible for a subsidy for up to two
+      nights’ stay. Non–concession card holders are required to pay the first night’s expenses in
+      full but are automatically eligible for a subsidy for their second night’s stay.
+    plain_summary: >-
+      Up to two nights are covered without medical approval. Without a concession card you pay
+      the first night yourself, unless §6.1.2 applies.

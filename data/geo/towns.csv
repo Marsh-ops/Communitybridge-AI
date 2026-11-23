@@ -1,0 +1,20 @@
+town_id,name,region,apy_lands,synthetic
+ADELAIDE,Adelaide,Adelaide metropolitan,false,true
+CEDUNA,Ceduna,Far West Coast,false,true
+KOONIBBA,Koonibba,Far West Coast,false,true
+YALATA,Yalata,Far West Coast,false,true
+STREAKY_BAY,Streaky Bay,Eyre Peninsula,false,true
+WUDINNA,Wudinna,Eyre Peninsula,false,true
+KIMBA,Kimba,Eyre Peninsula,false,true
+CLEVE,Cleve,Eyre Peninsula,false,true
+TUMBY_BAY,Tumby Bay,Eyre Peninsula,false,true
+CUMMINS,Cummins,Eyre Peninsula,false,true
+PORT_LINCOLN,Port Lincoln,Eyre Peninsula,false,true
+WHYALLA,Whyalla,Eyre Peninsula,false,true
+PORT_AUGUSTA,Port Augusta,Upper Spencer Gulf,false,true
+PUKATJA,Pukatja (Ernabella),APY Lands,true,true
+SYN_100,Synthetic Boundary Town 100,Synthetic test town,false,true
+SYN_95,Synthetic Boundary Town 95,Synthetic test town,false,true
+SYN_90,Synthetic Boundary Town 90,Synthetic test town,false,true
+SYN_70,Synthetic Boundary Town 70,Synthetic test town,false,true
+SYN_45,Synthetic Boundary Town 45,Synthetic test town,false,true

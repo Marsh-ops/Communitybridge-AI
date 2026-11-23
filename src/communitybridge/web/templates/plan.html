@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{% if problems %}Problem: {% endif %}Your plan - CommunityBridge AI{% endblock %}
+{% block content %}
+{% include "_problems.html" %}
+<h1>Your plan</h1>
+{% if fallback_note %}<p class="note">{{ fallback_note }}</p>{% endif %}
+<p>Nothing has been booked or shared. Every statement below shows where it came from. A statement with no current source is blocked, and says why.</p>
+<p class="counts">{{ rows | length }} statements: {{ verified }} verified, {{ blocked }} blocked.</p>
+<p class="note">
+  <span class="badge badge-simulated">SIMULATED</span>
+  marks anything that comes from a made-up timetable, fare sheet or calendar. Nothing real is booked, paid for or sent.
+</p>
+
+<ol class="plan">
+  {% for row in rows %}
+  <li class="plan-item">
+    <p class="plan-status">
+      {% if row.verified %}<span class="badge badge-verified">Verified</span>{% else %}<span class="badge badge-blocked">Blocked</span>{% endif %}
+      {% if row.simulated %}<span class="badge badge-simulated">SIMULATED</span>{% endif %}
+    </p>
+    <p class="statement">{{ row.statement }}</p>
+    {% if row.sources %}
+    <p class="sources-heading">Where this comes from</p>
+    <ul class="sources">
+      {% for group in row.sources %}
+      <li class="source">{{ group.source }} (last verified <time datetime="{{ group.verified_iso }}">{{ group.verified_text }}</time>): {{ group.sections | join(", ") }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="sources-heading">No source.</p>
+    {% endif %}
+    {% if not row.verified %}
+    <p class="blocked-reason"><strong>Why this is blocked:</strong> {{ row.blocked_reason }}</p>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ol>
+
+{% if questions %}
+<h2>Questions for you</h2>
+<ul>
+  {% for question in questions %}<li>{{ question }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+{% if wording %}
+<h2>In plain words</h2>
+<p class="wording-label"><strong>Not verified.</strong> {{ wording.label }}</p>
+<blockquote class="own-words">{{ wording.text }}</blockquote>
+{% if wording.cited_sections %}<p>It cites: {% for section in wording.cited_sections %}§{{ section }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+{% endif %}
+
+{% if awaiting_decision %}
+{#- Gate 2. The plan is answered only by this POSTed form; opening the page approves nothing. -#}
+<form method="post" action="/journeys/{{ journey_id }}/plan">
+  <h2>Do you approve this plan?</h2>
+  <p>
+    {% if booking_follows %}Approving does not book anything. You choose a booking next, and nothing is sent until you approve each action.
+    {% else %}This plan is information only, so approving it ends here. Nothing is booked or shared.{% endif %}
+  </p>
+  <p class="actions">
+    <button type="submit" name="decision" value="approve">Yes, approve this plan</button>
+    <button type="submit" name="decision" value="reject" class="secondary">No, send it back</button>
+  </p>
+</form>
+{% endif %}
+{% endblock %}

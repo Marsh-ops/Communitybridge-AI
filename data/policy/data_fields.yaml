@@ -1,0 +1,73 @@
+# Consent data-field policy: the minimum personal data each action needs.
+# Read only by the Consent Agent. Every action needs explicit, per-action approval (Gate 4,
+# the state graph), and every approval can be withdrawn; `on_withdrawal` tells the user
+# what withdrawing undoes. Recipients of "simulated_*" actions are SIMULATED services:
+# no real booking or data release happens in this prototype.
+#
+# Sensitivity:
+#   standard     - may be released to the listed recipient after approval
+#   sensitive    - only to a PATS authorised officer (§8.3), never to a provider
+#   never_share  - collected or derived for the user's own plan only; no action may release it
+
+policy_version: "1.0"
+
+fields:
+  given_name: {description: First name, sensitivity: standard}
+  family_name: {description: Last name, sensitivity: standard}
+  contact_phone: {description: Phone number for booking confirmations, sensitivity: standard}
+  origin_town: {description: Town the client travels from, sensitivity: standard}
+  destination_town: {description: Town of the appointment, sensitivity: standard}
+  travel_dates: {description: Outbound and return travel dates, sensitivity: standard}
+  number_of_travellers: {description: Client plus escort if any, sensitivity: standard}
+  check_in_date: {description: Accommodation check-in date, sensitivity: standard}
+  check_out_date: {description: Accommodation check-out date, sensitivity: standard}
+  date_of_birth: {description: Needed by a clinic to identify the patient, sensitivity: standard}
+  specialty: {description: Specialty of the appointment, sensitivity: standard}
+  preferred_appointment_slot: {description: The slot the client chose, sensitivity: standard}
+  mobility_assistance_needed: {description: Whether boarding or seating help is needed (yes/no only), sensitivity: standard}
+  eligibility_summary: {description: The rules-engine decision with cited sections, sensitivity: standard}
+  indigenous_status: {description: "Aboriginal and/or Torres Strait Islander identity (PATS §6.1.1, §6.1.2, §7.2.8)", sensitivity: sensitive}
+  concession_card_held: {description: Whether a concession card is held (yes/no), sensitivity: sensitive}
+  financial_hardship: {description: Whether the client reports severe financial hardship (§6.5.5), sensitivity: sensitive}
+  medicare_number: {description: Medicare card number, sensitivity: never_share}
+  concession_card_number: {description: Concession card number, sensitivity: never_share}
+  clinical_notes: {description: Any diagnosis or clinical detail, sensitivity: never_share}
+
+actions:
+  simulated_transport_request:
+    description: Ask the (simulated) transport provider to hold seats for the planned trip.
+    recipient: SIMULATED transport provider
+    recipient_type: simulated_provider
+    purpose: To hold seats on the bus or flight for your travel dates.
+    required_fields: [given_name, family_name, contact_phone, origin_town, destination_town, travel_dates, number_of_travellers, mobility_assistance_needed]
+    approval_required: true
+    on_withdrawal: The SIMULATED seat hold is cancelled and your details are removed from the request. Seats already travelled on can't be undone.
+
+  simulated_accommodation_request:
+    description: Ask the (simulated) accommodation provider to hold a room.
+    recipient: SIMULATED accommodation provider
+    recipient_type: simulated_provider
+    purpose: To hold a room near your appointment for the nights you need.
+    required_fields: [given_name, family_name, contact_phone, check_in_date, check_out_date, number_of_travellers]
+    approval_required: true
+    on_withdrawal: The SIMULATED room hold is cancelled and your details are removed from the request.
+
+  simulated_appointment_request:
+    description: Ask the (simulated) specialist clinic to hold the chosen appointment slot.
+    recipient: SIMULATED specialist clinic
+    recipient_type: simulated_provider
+    purpose: To hold the appointment time that fits your travel.
+    required_fields: [given_name, family_name, date_of_birth, contact_phone, specialty, preferred_appointment_slot]
+    approval_required: true
+    on_withdrawal: The SIMULATED appointment hold is released and your details are removed from the request.
+
+  share_plan_with_authorised_officer:
+    description: >-
+      Share the plan with an ACCHO Aboriginal Health Practitioner or Liaison Officer acting as a
+      PATS authorised officer (§8.3), e.g. when the rules engine returns needs_review.
+    recipient: ACCHO authorised officer (prospective partner)
+    recipient_type: authorised_officer
+    purpose: So an authorised officer can review your plan and help with the parts that need a person to decide.
+    required_fields: [given_name, family_name, contact_phone, origin_town, specialty, travel_dates, eligibility_summary, indigenous_status, concession_card_held, financial_hardship]
+    approval_required: true
+    on_withdrawal: The officer is told you have withdrawn consent and the shared plan is removed from their queue. Anything they have already done for you is not undone.

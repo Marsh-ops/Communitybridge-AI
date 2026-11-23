@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{% if problems %}Problem: {% endif %}Choose a booking - CommunityBridge AI{% endblock %}
+{% block content %}
+{% include "_problems.html" %}
+<h1>Choose a booking to ask for</h1>
+<p>
+  <span class="badge badge-simulated">SIMULATED</span>
+  Nothing real is booked. These are requests to made-up services. Choose one option and give your details.
+  The next screen shows exactly what would be shared, and nothing is sent until you approve each action.
+</p>
+
+{#- Gate 3. Answered only by this POSTed form. No option is chosen for the person. -#}
+<form method="post" action="/journeys/{{ journey_id }}/booking">
+  <fieldset>
+    <legend>Which option would you like us to ask for?</legend>
+    {% for card in cards %}
+    <div class="option">
+      <input type="radio" id="option-{{ card.value }}" name="option" value="{{ card.value }}"{% if values.get("option") == card.value %} checked{% endif %} required>
+      <label for="option-{{ card.value }}">Option {{ card.number }} <span class="badge badge-simulated">SIMULATED</span></label>
+      <dl class="details">
+        {% for row in card.rows %}
+        <div class="detail"><dt>{{ row.label }}</dt><dd>{% if row.iso %}<time datetime="{{ row.iso }}">{{ row.text }}</time>{% else %}{{ row.text }}{% endif %}</dd></div>
+        {% endfor %}
+      </dl>
+      {% for note in card.notes %}<p class="note">{{ note }}</p>{% endfor %}
+      <p class="sources-heading">Where this comes from</p>
+      <ul class="sources">
+        {% for group in card.sources %}
+        <li class="source">{{ group.source }} (last verified <time datetime="{{ group.verified_iso }}">{{ group.verified_text }}</time>): {{ group.sections | join(", ") }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  </fieldset>
+
+  <h2>Your details</h2>
+  <p>A booking needs these. They stay here until the next screen, where you decide, action by action, what is shared.</p>
+  <p class="note"><strong>Made-up details only.</strong> This prototype is for demonstration. Please do not type a real name, phone number or date of birth.</p>
+  <p>
+    <label for="given-name">First name</label><br>
+    <input type="text" id="given-name" name="given_name" value="{{ values.get('given_name', '') }}" maxlength="100" autocomplete="off" required>
+  </p>
+  <p>
+    <label for="family-name">Last name</label><br>
+    <input type="text" id="family-name" name="family_name" value="{{ values.get('family_name', '') }}" maxlength="100" autocomplete="off" required>
+  </p>
+  <p>
+    <label for="contact-phone">Phone number</label><br>
+    <input type="text" inputmode="tel" id="contact-phone" name="contact_phone" value="{{ values.get('contact_phone', '') }}" maxlength="20" autocomplete="off" required>
+  </p>
+  <p>
+    <label for="date-of-birth">Date of birth</label><br>
+    <input type="date" id="date-of-birth" name="date_of_birth" value="{{ values.get('date_of_birth', '') }}" autocomplete="off" required>
+  </p>
+  <fieldset>
+    <legend>Do you need help boarding or with seating?</legend>
+    <p class="choices">
+      <input type="radio" id="mobility-yes" name="mobility_assistance_needed" value="yes"{% if values.get("mobility_assistance_needed") == "yes" %} checked{% endif %} required>
+      <label for="mobility-yes">Yes</label>
+      <input type="radio" id="mobility-no" name="mobility_assistance_needed" value="no"{% if values.get("mobility_assistance_needed") == "no" %} checked{% endif %}>
+      <label for="mobility-no">No</label>
+    </p>
+  </fieldset>
+  <p class="choices">
+    <input type="checkbox" id="made-up" name="made_up" value="yes"{% if values.get("made_up") == "yes" %} checked{% endif %}>
+    <label for="made-up">These details are made up.</label>
+  </p>
+
+  <p class="actions">
+    <button type="submit" name="decision" value="approve">Ask for this booking (SIMULATED)</button>
+    <button type="submit" name="decision" value="decline" class="secondary">No, do not ask for a booking</button>
+  </p>
+</form>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{% if problems %}Problem: {% endif %}What may be shared - CommunityBridge AI{% endblock %}
+{% block content %}
+{% include "_problems.html" %}
+<h1>What may be shared?</h1>
+<p>
+  <span class="badge badge-simulated">SIMULATED</span>
+  Each action below is decided on its own. Declining one does not affect the others, and nothing is sent for an action you do not approve.
+  Only the details listed are shared, and you can withdraw later.
+</p>
+
+{#- Gate 4. Every action needs its own answer: no answer is chosen for the person, and there is no
+    "approve all". Data is released only for an action approved on this POSTed form. -#}
+<form method="post" action="/journeys/{{ journey_id }}/consent">
+  {% for card in cards %}
+  <fieldset class="action">
+    <legend>{{ card.description }} <span class="badge badge-simulated">SIMULATED</span></legend>
+    <p><strong>Goes to:</strong> {{ card.recipient }}</p>
+    <p><strong>Why:</strong> {{ card.purpose }}</p>
+    <p class="sources-heading">What would be shared (only this)</p>
+    <dl class="details">
+      {% for field in card.fields %}
+      <div class="detail"><dt>{{ field.description }}</dt><dd>{% if field.value is none %}<strong>Missing</strong>{% else %}{{ field.value }}{% endif %}</dd></div>
+      {% endfor %}
+    </dl>
+    {% if card.missing %}
+    <p class="blocked-reason">This cannot be approved while these details are missing: {{ card.missing | join(", ") }}.</p>
+    {% endif %}
+    <p><strong>If you withdraw later:</strong> {{ card.on_withdrawal }}</p>
+    <p class="choices">
+      <input type="radio" id="{{ card.field_name }}-approve" name="{{ card.field_name }}" value="approve"{% if card.chosen == "approve" %} checked{% endif %}{% if card.missing %} disabled{% endif %}>
+      <label for="{{ card.field_name }}-approve">Approve: share these details</label>
+      <input type="radio" id="{{ card.field_name }}-decline" name="{{ card.field_name }}" value="decline"{% if card.chosen == "decline" %} checked{% endif %}>
+      <label for="{{ card.field_name }}-decline">Decline: share nothing</label>
+    </p>
+  </fieldset>
+  {% endfor %}
+  <p class="actions"><button type="submit">Save my choices</button></p>
+</form>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{% if problems %}Problem: {% endif %}Is this what you meant? - CommunityBridge AI{% endblock %}
+{% block content %}
+{% include "_problems.html" %}
+<h1>Is this what you meant?</h1>
+<p>Nothing has been booked or shared. Please check what we understood, then choose a button at the bottom.</p>
+
+<h2>Your words</h2>
+<blockquote class="own-words">{{ own_words }}</blockquote>
+
+<h2>What we understood</h2>
+<dl class="details">
+  {% for row in goal_rows %}
+  <div class="detail">
+    <dt>{{ row.label }}</dt>
+    <dd>{% if row.iso %}<time datetime="{{ row.iso }}">{{ row.text }}</time>{% else %}{{ row.text }}{% endif %}</dd>
+  </div>
+  {% endfor %}
+</dl>
+
+<form method="post" action="/journeys/{{ journey_id }}/confirm">
+  <h2>Questions to check</h2>
+  <p>We have filled these in for a typical adult. Please correct any that are wrong.</p>
+  {% for control in controls %}
+    {% if control.kind == "yes_no" %}
+  <fieldset>
+    <legend>{{ control.question }}</legend>
+    <p class="choices">
+      <input type="radio" id="{{ control.name }}-yes" name="{{ control.name }}" value="yes"{% if control.value == "yes" %} checked{% endif %}>
+      <label for="{{ control.name }}-yes">Yes</label>
+      <input type="radio" id="{{ control.name }}-no" name="{{ control.name }}" value="no"{% if control.value == "no" %} checked{% endif %}>
+      <label for="{{ control.name }}-no">No</label>
+    </p>
+  </fieldset>
+    {% else %}
+  <p>
+    <label for="{{ control.name }}">{{ control.question }}</label>
+    <input type="text" inputmode="numeric" id="{{ control.name }}" name="{{ control.name }}" value="{{ control.value }}" size="4" maxlength="3" autocomplete="off">
+  </p>
+    {% endif %}
+  {% endfor %}
+
+  <h2>Other details the rules will use</h2>
+  <p>These are starting assumptions, not things you told us. This prototype cannot change them yet.</p>
+  <dl class="details">
+    {% for row in assumed_rows %}
+    <div class="detail">
+      <dt>{{ row.label }}</dt>
+      <dd>{{ row.text }}</dd>
+    </div>
+    {% endfor %}
+  </dl>
+
+  <h2>Something not right?</h2>
+  <label for="goal-text">Change your words, then choose "Read my changed words again"</label>
+  <textarea id="goal-text" name="goal_text" rows="4" maxlength="{{ max_chars }}"
+            {% if problems %}aria-describedby="problems"{% endif %}>{{ wording }}</textarea>
+
+  <p class="actions">
+    <button type="submit" name="decision" value="confirm">Yes, this is right</button>
+    <button type="submit" name="decision" value="edit" class="secondary">Read my changed words again</button>
+    <button type="submit" name="decision" value="decline" class="secondary">No, stop here</button>
+  </p>
+</form>
+{% endblock %}

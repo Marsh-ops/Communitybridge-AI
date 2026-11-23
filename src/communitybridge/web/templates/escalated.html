@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Passed to staff - CommunityBridge AI{% endblock %}
+{% block content %}
+<h1>We have passed this to staff</h1>
+<p class="lead">{{ headline }}</p>
+{% if reason %}<p><strong>Why:</strong> {{ reason }}</p>{% endif %}
+
+<h2>What was and was not done</h2>
+<ul>
+  {% for line in done %}<li>{{ line }}</li>{% endfor %}
+</ul>
+
+{% if tried %}
+<h2>What we tried</h2>
+<ul>
+  {% for line in tried %}<li>{{ line }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+<h2>What happens next</h2>
+<p>
+  This prototype does not send your request to anyone. A real service would hand it to a staff member,
+  who could look at it with you. Nothing more will happen here unless you try again.
+</p>
+
+{% if own_words %}
+<h2>Try again</h2>
+<form method="post" action="/goal">
+  <label for="goal-text">Your request. Change the words if you like, then try again.</label>
+  <textarea id="goal-text" name="goal_text" rows="4" maxlength="2000" required>{{ own_words }}</textarea>
+  <p class="actions"><button type="submit">Try again with these words</button></p>
+</form>
+{% endif %}
+
+{#- A row of links, each laid out as a target at least 44 px tall (WCAG 2.5.8). -#}
+<p class="links">
+  <a href="/journeys/{{ journey_id }}/trace">See what the agents did</a>
+  {% if has_plan %}<a href="/journeys/{{ journey_id }}/plan">View the plan that was made</a>{% endif %}
+  <a href="/">Start a new request</a>
+</p>
+{% endblock %}

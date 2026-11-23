@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "communitybridge"
+version = "0.1.0"
+description = "Constrained multi-agent support planner for PATS specialist travel (prototype; synthetic data only)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.7",  # boundary models
+    "pyyaml>=6",  # versioned PATS rules data
+    # the agent graph and its SQLite checkpoints. Written and tested against
+    # langgraph 1.2.19 and langgraph-checkpoint-sqlite 3.1.3; the serializer allow-list in
+    # graph/checkpoint.py needs the langgraph-checkpoint 4.x API.
+    "langgraph>=1.2",
+    "langgraph-checkpoint-sqlite>=3.1",
+    # the web interface (server-rendered HTML).
+    "fastapi>=0.115",
+    "jinja2>=3.1",
+    "uvicorn>=0.30",
+    # every gate is a POSTed form, and Starlette cannot read a form without this. It was
+    # installed by hand during development and left out of this list until a clean-copy
+    # run found it: a fresh install failed on every form.
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.6",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# Ship the templates and stylesheet with the package, not only when run from the checkout.
+[tool.setuptools.package-data]
+"communitybridge.web" = ["templates/*.html", "static/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]  # long lines in prose comments are fine

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ heading }} - CommunityBridge AI{% endblock %}
+{% block content %}
+<h1>{{ heading }}</h1>
+{% for paragraph in paragraphs %}
+<p>{{ paragraph }}</p>
+{% endfor %}
+<p class="links"><a href="/">Start a new request</a></p>
+{% endblock %}

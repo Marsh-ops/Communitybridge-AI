@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ruff_cache/
+.cache/
+
+# Local data and secrets
+*.db
+*.db-wal
+*.db-shm
+.env

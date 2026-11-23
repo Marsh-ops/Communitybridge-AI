@@ -1,0 +1,11 @@
+# SIMULATED accommodation availability and prices. Invented for testing.
+# Read by src/communitybridge/simulated/accommodation_api.py.
+# Rates chosen around the PATS §7.3 caps ($110 per person, $154 client + escort):
+# ACC-ADL-01 is under both caps, ACC-ADL-02 is over both, ACC-PLN-01 is between them.
+
+availability:
+  - {accommodation_id: ACC-ADL-01, nightly_rate_aud: 95.00, unavailable_dates: [2026-11-23, 2026-11-24], simulated: true, synthetic: true}
+  - {accommodation_id: ACC-ADL-02, nightly_rate_aud: 165.00, unavailable_dates: [], simulated: true, synthetic: true}
+  - {accommodation_id: ACC-ADL-03, nightly_rate_aud: 70.00, unavailable_dates: [], simulated: true, synthetic: true}
+  - {accommodation_id: ACC-PLN-01, nightly_rate_aud: 120.00, unavailable_dates: [], simulated: true, synthetic: true}
+  - {accommodation_id: ACC-WHY-01, nightly_rate_aud: 85.00, unavailable_dates: [], simulated: true, synthetic: true}

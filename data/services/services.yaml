@@ -1,0 +1,75 @@
+# Synthetic, community-administered specialist service dataset.
+# Every service, name and date is invented for testing; none is a real provider.
+# In a real deployment this file would be maintained by the ACCHO (data governor, project plan).
+#
+# Design notes for the scenarios:
+# - Cardiology exists only in Adelaide, so the core Ceduna -> Adelaide journey stays eligible
+#   because the nearest service wins ( including telehealth and visiting services).
+# - Ceduna has a visiting ophthalmology clinic and telehealth psychiatry/endocrinology, so
+#   travel to Adelaide for those specialties tests §6.4.6 nearest and bypass rules.
+# - SVC-WHY-DERM-V1 is deliberately stale (last_verified 2025-03-01) for the Verifier.
+# - Physiotherapy is deliberately ineligible (allied health, §6.4.4).
+
+# Which kind of health professional provides a specialty that is not a medical specialist.
+# PATS §6.4.4 lists the excluded kinds ("allied health professionals", ...) but not which
+# specialties belong to them, so the dataset says. Each value must be one of the
+# ineligible_professionals entries in data/rules/pats_v26_4.yaml; a test checks that.
+non_specialist_categories:
+  Physiotherapy: allied health professionals
+
+services:
+  # ------------------------------------------------------------------ Adelaide (resident)
+  - {service_id: SVC-ADL-CARD-01, name: Synthetic Adelaide Heart Clinic, specialty: Cardiology, town: ADELAIDE, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-10-01, synthetic: true}
+  - {service_id: SVC-ADL-OPHT-01, name: Synthetic Adelaide Eye Centre, specialty: Ophthalmology, town: ADELAIDE, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-10-01, synthetic: true}
+  - {service_id: SVC-ADL-ONCM-01, name: Synthetic Adelaide Cancer Centre, specialty: Oncology (medical), town: ADELAIDE, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-15, synthetic: true}
+  - {service_id: SVC-ADL-ONCR-01, name: Synthetic Adelaide Radiation Oncology, specialty: Oncology (radiation), town: ADELAIDE, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-15, synthetic: true}
+  - {service_id: SVC-ADL-NEPH-01, name: Synthetic Adelaide Kidney Clinic, specialty: Nephrology, town: ADELAIDE, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-20, synthetic: true}
+  - {service_id: SVC-ADL-ENDO-01, name: Synthetic Adelaide Endocrine Clinic, specialty: Endocrinology, town: ADELAIDE, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-20, synthetic: true}
+  - {service_id: SVC-ADL-PSYC-01, name: Synthetic Adelaide Psychiatry Rooms, specialty: Psychiatry, town: ADELAIDE, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-20, synthetic: true}
+  - {service_id: SVC-ADL-ORTH-01, name: Synthetic Adelaide Orthopaedics, specialty: Orthopaedic surgery (general), town: ADELAIDE, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-01, synthetic: true}
+  - {service_id: SVC-ADL-DERM-01, name: Synthetic Adelaide Skin Clinic, specialty: Dermatology, town: ADELAIDE, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-01, synthetic: true}
+  - {service_id: SVC-ADL-OBGY-01, name: Synthetic Adelaide Women's Health, specialty: Obstetrics and gynaecology (general), town: ADELAIDE, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-01, synthetic: true}
+  - {service_id: SVC-ADL-PHYS-01, name: Synthetic Adelaide Physiotherapy, specialty: Physiotherapy, town: ADELAIDE, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-01, synthetic: true}
+
+  # ---------------------------------------------------------------------------- Port Lincoln
+  - {service_id: SVC-PLN-GSUR-01, name: Synthetic Port Lincoln Surgical Rooms, specialty: General surgery, town: PORT_LINCOLN, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-10, synthetic: true}
+  - {service_id: SVC-PLN-CHEM-01, name: Synthetic Port Lincoln Chemotherapy Unit, specialty: chemotherapy, town: PORT_LINCOLN, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-10, synthetic: true}
+  - {service_id: SVC-PLN-DIAL-01, name: Synthetic Port Lincoln Dialysis Unit, specialty: renal dialysis, town: PORT_LINCOLN, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-10, synthetic: true}
+  - service_id: SVC-PLN-OPHT-V1
+    name: Synthetic Visiting Eye Clinic (Port Lincoln)
+    specialty: Ophthalmology
+    town: PORT_LINCOLN
+    mode: visiting
+    source: CommunityBridge synthetic service dataset v1
+    last_verified: 2026-09-10
+    visit_dates: [2026-11-05, 2026-12-03, 2027-01-14]
+    synthetic: true
+
+  # --------------------------------------------------------------------------------- Whyalla
+  - {service_id: SVC-WHY-OBGY-01, name: Synthetic Whyalla Women's Health, specialty: Obstetrics and gynaecology (general), town: WHYALLA, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-08-20, synthetic: true}
+  - {service_id: SVC-WHY-CHEM-01, name: Synthetic Whyalla Chemotherapy Unit, specialty: chemotherapy, town: WHYALLA, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-08-20, synthetic: true}
+  - service_id: SVC-WHY-DERM-V1
+    name: Synthetic Visiting Skin Clinic (Whyalla)
+    specialty: Dermatology
+    town: WHYALLA
+    mode: visiting
+    source: CommunityBridge synthetic service dataset v1
+    last_verified: 2025-03-01  # deliberately stale, for the Verifier freshness check
+    visit_dates: [2026-11-18, 2027-02-17]
+    synthetic: true
+
+  # ---------------------------------------------------------------------------------- Ceduna
+  - service_id: SVC-CED-OPHT-V1
+    name: Synthetic Visiting Eye Clinic (Ceduna)
+    specialty: Ophthalmology
+    town: CEDUNA
+    mode: visiting
+    source: CommunityBridge synthetic service dataset v1
+    last_verified: 2026-09-25
+    visit_dates: [2026-11-12, 2027-02-11]
+    synthetic: true
+  - {service_id: SVC-CED-PSYC-T1, name: Synthetic Telehealth Psychiatry (Ceduna Hospital), specialty: Psychiatry, town: CEDUNA, mode: telehealth, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-25, synthetic: true}
+  - {service_id: SVC-CED-ENDO-T1, name: Synthetic Telehealth Endocrinology (Ceduna Hospital), specialty: Endocrinology, town: CEDUNA, mode: telehealth, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-25, synthetic: true}
+
+  # ---------------------------------------------------------------------------- Port Augusta
+  - {service_id: SVC-PAU-DIAL-01, name: Synthetic Port Augusta Dialysis Unit, specialty: renal dialysis, town: PORT_AUGUSTA, mode: resident, source: CommunityBridge synthetic service dataset v1, last_verified: 2026-09-05, synthetic: true}
